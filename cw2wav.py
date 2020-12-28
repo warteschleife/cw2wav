@@ -8,48 +8,57 @@ class CwGen:
         self._ramp_ms = (self._dit_ms / 5)
 
         self._alphabet = {
-            'a' : ".-",
-            'b' : "-...",
-            'c' : "-.-.",
-            'd' : "-..",
-            'e' : ".",
-            'f' : "..-.",
-            'g' : "--.",
-            'h' : "....",
-            'i' : "..",
-            'j' : ".---",
-            'k' : "-.-",
-            'l' : ".-..",
-            'm' : "--",
-            'n' : "-.",
-            'o' : "---",
-            'p' : ".--.",
-            'q' : "--.-",
-            'r' : ".-.",
-            's' : "...",
-            't' : "-",
-            'u' : "..-",
-            'v' : "...-",
-            'w' : ".--",
-            'x' : "-..-",
-            'y' : "-.--",
-            'z' : "--..",
-            '0' : "-----",
-            '1' : ".----",
-            '2' : "..---",
-            '3' : "...--",
-            '4' : "....-",
-            '5' : ".....",
-            '6' : "-....",
-            '7' : "--...",
-            '8' : "---..",
-            '9' : "----.",
-            '?' : "..--..",
-            ',' : "--..--",
-            '.' : ".-.-.-",
-            '=' : "-...-"
+            'a': ".-",
+            'b': "-...",
+            'c': "-.-.",
+            'd': "-..",
+            'e': ".",
+            'f': "..-.",
+            'g': "--.",
+            'h': "....",
+            'i': "..",
+            'j': ".---",
+            'k': "-.-",
+            'l': ".-..",
+            'm': "--",
+            'n': "-.",
+            'o': "---",
+            'p': ".--.",
+            'q': "--.-",
+            'r': ".-.",
+            's': "...",
+            't': "-",
+            'u': "..-",
+            'v': "...-",
+            'w': ".--",
+            'x': "-..-",
+            'y': "-.--",
+            'z': "--..",
+            '0': "-----",
+            '1': ".----",
+            '2': "..---",
+            '3': "...--",
+            '4': "....-",
+            '5': ".....",
+            '6': "-....",
+            '7': "--...",
+            '8': "---..",
+            '9': "----.",
+            '?': "..--..",
+            ',': "--..--",
+            '.': ".-.-.-",
+            '=': "-...-"
         }
 
+    def _simplyfy(self, input_text):
+        simplified = input_text.lower()
+        mappings = [("!", "."), ("ä", "ae"), ("ö", "oe"), ("ü", "ue"),
+                    ("ß", "ss")]
+
+        for m in mappings:
+            simplified = simplified.replace(m[0], m[1])
+
+        return simplified
 
     def _create_cw_sequence(self, plain_text):
         cw_sequence = ""
@@ -86,7 +95,9 @@ class CwGen:
         return sequence
 
     def _write_wav_file(self, file_name, sequence):
-        duration_seconds = int(sequence[-1][1] + (2* self._dah_ms))
+        duration_seconds = int(sequence[-1][1] + (2 * self._dah_ms))
+
+        print("The CW text is " + str(duration_seconds) + " seconds long.")
 
         periods_per_second = 680
         samples_per_second = 8000
@@ -108,16 +119,20 @@ class CwGen:
                         modulation = amplification
 
                         if time < sequence[0][0] + self._ramp_ms:
-                            modulation = amplification * (time - sequence[0][0]) / self._ramp_ms
+                            modulation = amplification * (
+                                time - sequence[0][0]) / self._ramp_ms
                         if time > sequence[0][1] - self._ramp_ms:
-                            modulation = amplification * (sequence[0][1] - time) / self._ramp_ms
+                            modulation = amplification * (sequence[0][1] -
+                                                          time) / self._ramp_ms
 
-                        value = int(math.sin(angle) * modulation) + amplification
+                        value = int(
+                            math.sin(angle) * modulation) + amplification
                     if time >= sequence[0][1]:
                         sequence = sequence[1:]
                 w.writeframes(struct.pack("B", value))
 
     def generate(self, text, file_name):
+        text = self._simplyfy(text)
         cw_sequence = self._create_cw_sequence(text)
         signal_sequence = self._create_time_sequence(cw_sequence)
         self._write_wav_file(file_name, signal_sequence)
