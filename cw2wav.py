@@ -1,47 +1,79 @@
-import wave, math, random, winsound, struct, sys, re
+import wave, math, random, winsound, struct, sys, re, yaml
+from util import morse_table
 
 
-def get_morse_table(file_name):
-    result = {}
-    with open("alphabet.txt", "r") as morse_table:
-        for line in morse_table.readlines():
-            line = line.strip()
-            if not line:
-                continue
-            if line.startswith("#"):
-                continue
-            elements = re.match("^(\\S)\\s+([\\.-]+)$", line)
-            if elements:
-                if elements.group(1) in result.keys():
-                    raise Exception("Duplicate definition for character '" +
-                                    elements.group(1) + "'")
-                result[elements.group(1)] = elements.group(2)
-            else:
-                raise Exception("Invalid line in '" + file_name + "': \"" +
-                                line + "\"")
-    return result
+class Configuration:
+    def __init__(self):
+        with open("cw2wav.yaml", "r") as config_file:
+            lines = config_file.readlines()
+            text = "".join(lines)
+            yaml_content = yaml.load_all(text, Loader=yaml.FullLoader)
+            self._config_lookup = {}
+            if yaml_content:
+                for element in yaml_content:
+                    self._config_lookup[element["name"]] = element
+
+    def get_configuration(self, name):
+        path = [self._config_lookup[name]]
+
+        while "basis" in path[0].keys():
+            parent = path[0]["basis"]
+            path = [self._config_lookup[parent]] + path
+
+        result = {}
+        for element in path:
+            for k in element.keys():
+                result[k] = element[k]
+
+        return result
 
 
 class CwGen:
-    def __init__(self, alphabet, sampling_rate=44000, len_dit=0.1):
-        len_dit = len_dit
-        len_dah = 3 * len_dit
+    def __init__(self, configuration, alphabet):
+
+        sampling_rate = 44000
+        if "sampling_rate" in configuration.keys():
+            sampling_rate = configuration["sampling_rate"]
+
+        len_dit = 0.1
+        if "len_dit" in configuration.keys():
+            len_dit = configuration["len_dit"]
+
+        len_separate_char = 3 * len_dit
+        if "len_separate_char" in configuration.keys():
+            len_separate_char = configuration["len_separate_char"]
+
         ramp_time = len_dit / 8
+        if "ramp_time" in configuration.keys():
+            ramp_time = configuration["ramp_time"]
+
+        self._frequency = 680
+        if "frequency" in configuration.keys():
+            self._frequency = configuration["frequency"]
+
+        len_dah = 3 * len_dit
+
+        print("The following settings are applied:")
+        print("-----------------------------------")
+        print("Length of DIT:       " + str(len_dit) + " s")
+        print("Length of DAH:       " + str(len_dah) + " s")
+        print("Space between chars: " + str(len_separate_char) + " s")
+        print("Rising/Falling Time: " + str(ramp_time) + " s")
+        print("Sampling Rate:       " + str(sampling_rate))
+        print("Frequency:           " + str(self._frequency) + " Hz")
 
         self._sampling_rate = sampling_rate
         self._tone_dit = self._generate_tone(len_dit, 100, ramp_time)
         self._tone_dah = self._generate_tone(len_dah, 100, ramp_time * 3)
         self._separate_tone = self._generate_tone(len_dit, 0, 0)
-        self._separate_char = self._generate_tone(len_dah, 0, 0)
+        self._separate_char = self._generate_tone(len_separate_char, 0, 0)
 
         self._alphabet = alphabet
 
     def _generate_tone(self, duration, volume, ramp_time):
         samples = bytearray()
 
-        periods_per_second = 680
-
-        samples_per_period = self._sampling_rate / periods_per_second
+        samples_per_period = self._sampling_rate / self._frequency
 
         num_samples = int(self._sampling_rate * duration)
 
@@ -134,24 +166,26 @@ class CwGen:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         exit()
 
+    configuration = Configuration()
+
     try:
-        alphabet = get_morse_table("alphabet.txt")
+        alphabet = morse_table.get_morse_table("alphabet.txt")
     except Exception as ex:
         print(ex)
         exit(-1)
 
-    with open(sys.argv[1], "r") as textfile:
+    with open(sys.argv[2], "r", encoding="utf8") as textfile:
         text = "vvv  " + (" ".join(textfile.readlines())).replace("\n", "=")
 
-        cw_gen = CwGen(alphabet, len_dit=0.12)
+        cw_gen = CwGen(configuration.get_configuration(sys.argv[1]), alphabet)
 
         try:
-            cw_gen.generate(text, sys.argv[2])
+            cw_gen.generate(text, sys.argv[3])
         except Exception as ex:
             print(ex)
             exit(-1)
 
-        winsound.PlaySound(sys.argv[2], winsound.SND_FILENAME)
+        winsound.PlaySound(sys.argv[3], winsound.SND_FILENAME)
