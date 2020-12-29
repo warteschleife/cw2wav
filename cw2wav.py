@@ -1,31 +1,6 @@
-import wave, math, random, winsound, struct, sys, re, yaml
+import wave, math, random, winsound, struct, sys, re
 from util import morse_table
-
-
-class Configuration:
-    def __init__(self):
-        with open("cw2wav.yaml", "r") as config_file:
-            lines = config_file.readlines()
-            text = "".join(lines)
-            yaml_content = yaml.load_all(text, Loader=yaml.FullLoader)
-            self._config_lookup = {}
-            if yaml_content:
-                for element in yaml_content:
-                    self._config_lookup[element["name"]] = element
-
-    def get_configuration(self, name):
-        path = [self._config_lookup[name]]
-
-        while "basis" in path[0].keys():
-            parent = path[0]["basis"]
-            path = [self._config_lookup[parent]] + path
-
-        result = {}
-        for element in path:
-            for k in element.keys():
-                result[k] = element[k]
-
-        return result
+from util import configuration
 
 
 class CwGen:
@@ -169,7 +144,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 4:
         exit()
 
-    configuration = Configuration()
+    configuration = configuration.Configuration()
 
     try:
         alphabet = morse_table.get_morse_table("alphabet.txt")
