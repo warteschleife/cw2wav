@@ -72,10 +72,21 @@ class CwGen:
     def _simplyfy(self, input_text):
         simplified = input_text.lower()
         mappings = [("!", "."), ("ä", "ae"), ("ö", "oe"), ("ü", "ue"),
-                    ("ß", "ss")]
+                    ("ß", "ss"), ("@", "at"), ("+", "plus")]
 
         for m in mappings:
             simplified = simplified.replace(m[0], m[1])
+
+        chars = []
+        for c in simplified:
+            if not c in chars:
+                chars.append(c)
+
+        for c in chars:
+            if not c in self._alphabet.keys():
+                print("Character '" + c +
+                      "' is unknown. Will replace it by a space.")
+                simplified = simplified.replace(c, " ")
 
         return simplified
 

@@ -13,10 +13,15 @@ class Configuration:
                     self._config_lookup[element["name"]] = element
 
     def get_configuration(self, name):
+
         path = [self._config_lookup[name]]
+        path_names = [name]
 
         while "basis" in path[0].keys():
             parent = path[0]["basis"]
+            if parent in path_names:
+                raise Exception("Cyclic configuration!")
+            path_names.append(parent)
             path = [self._config_lookup[parent]] + path
 
         result = {}
