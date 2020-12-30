@@ -27,14 +27,17 @@ class CwGen:
 
         len_dah = 3 * len_dit
 
-        print("The following settings are applied:")
-        print("-----------------------------------")
-        print("Length of DIT:       " + str(len_dit) + " s")
-        print("Length of DAH:       " + str(len_dah) + " s")
-        print("Space between chars: " + str(len_separate_char) + " s")
-        print("Rising/Falling Time: " + str(ramp_time) + " s")
-        print("Sampling Rate:       " + str(sampling_rate))
-        print("Frequency:           " + str(self._frequency) + " Hz")
+        print("Die folgenden Einstellungen werden genutzt:")
+        print("-------------------------------------------")
+        print("Dauer eines DIT:                       " + str(len_dit) + " s")
+        print("Dauer eines DAH:                       " + str(len_dah) + " s")
+        print("Zeit zwischen zwei Zeichen:            " +
+              str(len_separate_char) + " s")
+        print("Dauer der steigenden/fallenden Flanke: " + str(ramp_time) +
+              " s")
+        print("Samplerate:                            " + str(sampling_rate))
+        print("Tonfrequenz:                           " +
+              str(self._frequency) + " Hz")
 
         self._sampling_rate = sampling_rate
         self._tone_dit = self._generate_tone(len_dit, 100, ramp_time)
@@ -79,13 +82,18 @@ class CwGen:
 
         chars = []
         for c in simplified:
-            if not c in chars:
+            if (not c in chars) and (not c in self._alphabet.keys() and
+                                     (not c == ' ')):
                 chars.append(c)
 
-        for c in chars:
-            if not c in self._alphabet.keys():
-                print("Character '" + c +
-                      "' is unknown. Will replace it by a space.")
+        if chars:
+            print()
+            print(
+                "Einige Zeichen stehen nicht als Morsezeichen bereit und werden durch Leerzeichen ersetzt:"
+            )
+
+            for c in chars:
+                print("- '" + c + "'")
                 simplified = simplified.replace(c, " ")
 
         return simplified
@@ -107,30 +115,40 @@ class CwGen:
                 cw_sequence = cw_sequence + " "
         return cw_sequence
 
-    def _create_sample_sequence(self, cw_sequence):
-        sequence = bytearray()
+    def _calculate_sample_count(self, cw_sequence):
+        num_samples = 0
 
         for t in cw_sequence:
             if t == ".":
-                sequence = sequence + self._tone_dit
-                sequence = sequence + self._separate_tone
+                num_samples = num_samples + len(self._tone_dit)
+                num_samples = num_samples + len(self._separate_tone)
             elif t == "-":
-                sequence = sequence + self._tone_dah
-                sequence = sequence + self._separate_tone
+                num_samples = num_samples + len(self._tone_dah)
+                num_samples = num_samples + len(self._separate_tone)
             elif t == " ":
-                sequence = sequence + self._separate_char
+                num_samples = num_samples + len(self._separate_char)
 
-        return sequence
+        return num_samples
+
+    def _write_samples(self, file_handle, cw_sequence):
+        for t in cw_sequence:
+            if t == ".":
+                file_handle.writeframes(bytes(self._tone_dit))
+                file_handle.writeframes(bytes(self._separate_tone))
+            elif t == "-":
+                file_handle.writeframes(bytes(self._tone_dah))
+                file_handle.writeframes(bytes(self._separate_tone))
+            elif t == " ":
+                file_handle.writeframes(bytes(self._separate_char))
 
     def _write_wav_file(self, file_name, sequence):
 
         with wave.open(file_name, "wb") as w:
-            w.setnframes(len(sequence))
+            w.setnframes(self._calculate_sample_count(sequence))
             w.setnchannels(1)
             w.setsampwidth(1)
             w.setframerate(self._sampling_rate)
-
-            w.writeframes(bytes(sequence))
+            self._write_samples(w, sequence)
 
     def _seconds2minuteAsText(self, total_time_seconds):
         minutes = int(total_time_seconds / 60)
@@ -140,11 +158,15 @@ class CwGen:
     def generate(self, text, file_name):
         text = self._simplyfy(text)
         cw_sequence = self._create_cw_sequence(text)
-        signal_sequence = self._create_sample_sequence(cw_sequence)
-        total_time = len(signal_sequence) / self._sampling_rate
+        signal_sequence_count = self._calculate_sample_count(cw_sequence)
+        total_time = signal_sequence_count / self._sampling_rate
         character_count = len(text.replace(" ", ""))
+
+        print()
+        print("Details zur Aufnahme:")
+        print("---------------------")
         print("Gesamtdauer:        " + self._seconds2minuteAsText(total_time))
         print("Anzahl Zeichen:     " + str(character_count))
         print("Woerter pro Minute: " +
-              str((character_count * 60 / total_time) / 5))
-        self._write_wav_file(file_name, signal_sequence)
+              str(int((character_count * 60 / total_time) / 5)))
+        self._write_wav_file(file_name, cw_sequence)
