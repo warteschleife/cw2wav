@@ -21,13 +21,11 @@ Da es sich um ein Python Projekt handelt, sollte ein Python Interpreter vorhande
 
 Die folgenden Erklärungen basieren auf der Annahme, dass das Projekt so, wie es ist installiert wurde und Konfigurationen nicht verändert wurden.
 
-Eine Datei `cw_gedicht.txt` kann mit dem folgenden Aufruf in Morsezeichen umgewandelt und vorgespielt werden:
+Eine Datei `beispiel.txt` kann mit dem folgenden Aufruf in Morsezeichen umgewandelt und vorgespielt werden:
 
-`python cw2wav.py default cw_gedicht.txt cw_gedicht.wav`
+`python cw2wav.py default beispiel.txt beispiel.wav`
 
 Der Aufruf sollte nur dann fehlschlagen, wenn im Text Zeichen enthalten sind, die als Morsezeichen nicht in `alphabet.txt` enthalten sind.
-
-**Hinweisn 1:** Die Datei `cw_gedicht.wav` kann sehr groß werden, da das Format nicht komprimiert ist. Das sollte man im Auge behalten, wenn man umfangreichere Texte umwandeln möchte.
 
 ## Konfiguration
 
@@ -41,7 +39,7 @@ In einer Konfiguration können verschiedene Parameter festgelegt werden:
 | --------- | --------- | ------------ |
 | `sampling_rate` | Samplerate für die Sounddatei in Samples pro Sekunde. | 44000 |
 | `len_dit` | Länge eines DIT in Sekunde(n). Die Länge des DAH wird daraus abgeleitet (dreifache Länge). | 0,1 |
-| `len_separate_char` | Zeit zwischen zwei Morsezeichen in Sekunden. Wenn nicht angegeben, wird dieser Wert aus der Länge eine DIT abgeleitet. | 3 x `len_dit` |
+| `character_gap` | Zeit zwischen zwei Morsezeichen in Sekunden. Wenn nicht angegeben, wird dieser Wert aus der Länge eine DIT abgeleitet. | 3 x `len_dit` |
 | `ramp_time` | Tastung (Beschreibung weiter unten) | `len_dit` / 8 |
 | `frequency` | Tonhöhe in Hz | 680 |
 
