@@ -19,7 +19,7 @@ if __name__ == "__main__":
         exit(-1)
 
     with open(sys.argv[2], "r", encoding="utf8") as textfile:
-        text = "vvv  " + (" ".join(textfile.readlines())).replace("\n", "=")
+        text = (" ".join(textfile.readlines())).replace("\n", "=")
 
         cw_gen = CwGen(configuration.get_configuration(sys.argv[1]), alphabet)
 

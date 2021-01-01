@@ -13,7 +13,6 @@ class Configuration:
                     self._config_lookup[element["name"]] = element
 
     def get_configuration(self, name):
-
         path = [self._config_lookup[name]]
         path_names = [name]
 
@@ -24,9 +23,30 @@ class Configuration:
             path_names.append(parent)
             path = [self._config_lookup[parent]] + path
 
+        sources = {}
+
         result = {}
         for element in path:
             for k in element.keys():
                 result[k] = element[k]
+                sources[k] = element["name"]
+
+        print()
+        print(
+            "Anhand der Konfigurationsdatei wurden folgende Einstellungen vorgenommen:"
+        )
+        print(
+            "-------------------------------------------------------------------------"
+        )
+        for k in sorted(result.keys()):
+            if k == "name":
+                continue
+            if k == "basis":
+                continue
+            print("Parameter '" + k + "' wird auf den Wert '" +
+                  str(result[k]) + "' gesetzt.")
+            if not name == sources[k]:
+                print("(Der Wert wurde aus der Konfiguration '" + sources[k] +
+                      "' geerbt.)")
 
         return result
