@@ -27,6 +27,7 @@ class CwGen:
 
         len_dah = 3 * len_dit
 
+        print()
         print("Die folgenden Einstellungen werden genutzt:")
         print("-------------------------------------------")
         print("Dauer eines DIT:                       " + str(len_dit) + " s")
@@ -95,6 +96,13 @@ class CwGen:
             for c in chars:
                 print("- '" + c + "'")
                 simplified = simplified.replace(c, " ")
+
+        len_text = len(simplified)
+        simplified = simplified.replace("  ", " ")
+
+        while len(simplified) < len_text:
+            len_text = len(simplified)
+            simplified = simplified.replace("  ", " ")
 
         return simplified
 
