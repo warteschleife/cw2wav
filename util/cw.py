@@ -14,8 +14,8 @@ class CwGen:
             len_dit = configuration["len_dit"]
 
         len_separate_char = 3 * len_dit
-        if "len_separate_char" in configuration.keys():
-            len_separate_char = configuration["len_separate_char"]
+        if "character_gap" in configuration.keys():
+            len_separate_char = configuration["character_gap"]
 
         ramp_time = len_dit / 8
         if "ramp_time" in configuration.keys():
