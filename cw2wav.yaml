@@ -1,6 +1,8 @@
 ---
 name: default
 frequency: 440
+len_dit: 0.08
+character_gap: 1.0
 
 ---
 name: slow
@@ -15,7 +17,7 @@ len_dit: 0.08
 ---
 name: training
 basis: default
-len_dit: 0.07
+len_dit: 0.08
 character_gap: 1.0
 
 ---
