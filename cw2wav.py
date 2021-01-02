@@ -8,25 +8,33 @@ from util.cw import CwGen
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        exit()
+        print(
+            "Der Aufruf benötigt die Parameter 'Konfigurationsname', 'Inputdatei', 'Ausgabedatei'."
+        )
+        exit(-1)
+
+    configuration_name = sys.argv[1]
+    input_filename = sys.argv[2]
+    output_filename = sys.argv[3]
 
     configuration = configuration.Configuration()
 
     try:
         alphabet = morse_table.get_morse_table("alphabet.txt")
     except Exception as ex:
+        print("Das Morsealphabet konnte nicht geladen werden:")
         print(ex)
         exit(-1)
 
-    with open(sys.argv[2], "r", encoding="utf8") as textfile:
+    with open(input_filename, "r", encoding="utf8") as textfile:
         text = (" ".join(textfile.readlines())).replace("\n", "=")
 
-        cw_gen = CwGen(configuration.get_configuration(sys.argv[1]), alphabet)
-
         try:
-            cw_gen.generate(text, sys.argv[3])
+            cw_gen = CwGen(configuration.get_configuration(configuration_name),
+                           alphabet)
+            cw_gen.generate(text, output_filename)
+
+            winsound.PlaySound(output_filename, winsound.SND_FILENAME)
         except Exception as ex:
             print(ex)
             exit(-1)
-
-        winsound.PlaySound(sys.argv[3], winsound.SND_FILENAME)
