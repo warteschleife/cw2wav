@@ -1,10 +1,9 @@
 **Vorrede:** *Dies ist ein Miniprojekt unter vielen und bietet auch wirklich keine Funktionen, die nicht auch von anderen frei verfügbaren Programmen und Diensten bereitgestellt werden.*
  
 # cw2wav
-
 ## Übersicht
 
-Kern des Projekts ist das Python Skript `cw2wav.py`. Mit diesem Skript kann der Inhalt einer normalen Text Datei in Soundfile nach Wave Format umgewandelt werden, dass den Text als Morsezeichen enthält. Nachdem die Sounddatei erzeugt wurde, wird sie auch sofort abgespielt.
+Kern des Projekts ist das Python Skript `cw2wav.py`. Mit diesem Skript kann der Inhalt einer normalen Text Datei in ein Soundfile nach Wave Format umgewandelt werden, welches den Text als Morsezeichen enthält. Nachdem die Sounddatei erzeugt wurde, wird sie auch sofort abgespielt.
 
 In dem Projekt sind noch weitere Dateien enthalten:
 
@@ -17,15 +16,23 @@ Zum Projekt gehört auch das Skript `randomwords.py`. Damit können Textdateien 
 
 Da es sich um ein Python Projekt handelt, sollte ein Python Interpreter vorhanden sein. Ich habe es mit der Version `3.7.4` auf einem Windows-Rechner getestet. Eventuell müssen einige Python-Module nachinstalliert werden. Das sollte aber mit `pip` normalerweise kein Problem sein.
 
+## Vorbereitung
+
+Zunächst sollte man sich das ZIP-Archiv des Projekts von der Webseite laden. Diese Möglichkeit eröffnet sich, wenn man den grünen "Code"-Button oben rechts drückt.
+
+Das Archiv kann man lokal in einem beliebigen Verzeichnis entpacken.
 ## Ein erster Versuch
 
-Die folgenden Erklärungen basieren auf der Annahme, dass das Projekt so, wie es ist installiert wurde und Konfigurationen nicht verändert wurden.
+Die folgende Beschreibung bezieht sich auf Windows 10.
 
-Eine Datei `beispiel.txt` kann mit dem folgenden Aufruf in Morsezeichen umgewandelt und vorgespielt werden:
+Man öffnet ein Kommandozeilenfenster und wechselt in das Verzeichnis, in dem das Archiv entpackt wurde.
+
+Im Archiv ist eine Beispieldatei, die sinnigerweise "beispiel.txt" heisst, enthalten. Diese kann man in eine WAV-Datei
+umwandeln und sich zugleich vorspielen lassen, indem man folgendes Kommando eingibt:
 
 `python cw2wav.py default beispiel.txt beispiel.wav`
 
-Der Aufruf sollte nur dann fehlschlagen, wenn im Text Zeichen enthalten sind, die als Morsezeichen nicht in `alphabet.txt` enthalten sind.
+Der Morsecode sollte jetzt zu hören sein. Außerdem sollte anschließend die Datei "beispiel.wav" auf der Festplatte zu finden sein.
 
 ## Konfiguration
 
