@@ -163,6 +163,12 @@ class CwGen:
         seconds = int(total_time_seconds - minutes * 60)
         return str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
 
+    def get_wmp(self):
+        cw_sequence = self._create_cw_sequence("paris")
+        signal_sequence_count = self._calculate_sample_count(cw_sequence)
+        total_time = signal_sequence_count / self._sampling_rate
+        return 60 / total_time
+
     def generate(self, text, file_name):
         text = self._simplyfy(text)
         cw_sequence = self._create_cw_sequence(text)
@@ -175,6 +181,5 @@ class CwGen:
         print("---------------------")
         print("Gesamtdauer:        " + self._seconds2minuteAsText(total_time))
         print("Anzahl Zeichen:     " + str(character_count))
-        print("Woerter pro Minute: " +
-              str(int((character_count * 60 / total_time) / 5)))
+        print("Woerter pro Minute: " + str(self.get_wmp()))
         self._write_wav_file(file_name, cw_sequence)
