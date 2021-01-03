@@ -24,4 +24,4 @@ character_gap: 1.0
 name: training_fast
 basis: default
 len_dit: 0.07
-character_gap: 0.7
+character_gap: 0.9
