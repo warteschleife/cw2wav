@@ -17,7 +17,14 @@ if __name__ == "__main__":
     input_filename = sys.argv[2]
     output_filename = sys.argv[3]
 
-    configuration = configuration.Configuration()
+    parameters = {
+        "sampling_rate": 44000,
+        "len_dit": 0.1,
+        "ramp_time": None,
+        "frequency": 680
+    }
+
+    configuration = configuration.Configuration(parameters)
 
     try:
         alphabet = morse_table.get_morse_table("alphabet.txt")

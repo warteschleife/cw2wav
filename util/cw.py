@@ -5,25 +5,23 @@ import wave
 class CwGen:
     def __init__(self, configuration, alphabet):
 
-        sampling_rate = 44000
-        if "sampling_rate" in configuration.keys():
-            sampling_rate = configuration["sampling_rate"]
+        sampling_rate = configuration["sampling_rate"]
 
-        len_dit = 0.1
-        if "len_dit" in configuration.keys():
-            len_dit = configuration["len_dit"]
+        len_dit = configuration["len_dit"]
 
-        len_separate_char = 3 * len_dit
-        if "character_gap" in configuration.keys():
+        len_separate_char = configuration["character_gap"]
+
+        if not configuration["character_gap"] is None:
             len_separate_char = configuration["character_gap"]
+        else:
+            len_separate_char = 3 * len_dit
 
-        ramp_time = len_dit / 8
-        if "ramp_time" in configuration.keys():
+        if not configuration["ramp_time"] is None:
             ramp_time = configuration["ramp_time"]
+        else:
+            ramp_time = len_dit / 8
 
-        self._frequency = 680
-        if "frequency" in configuration.keys():
-            self._frequency = configuration["frequency"]
+        self._frequency = configuration["frequency"]
 
         len_dah = 3 * len_dit
 
@@ -111,7 +109,6 @@ class CwGen:
 
         for t in plain_text:
             if t == " ":
-                cw_sequence = cw_sequence + " "
                 cw_sequence = cw_sequence + " "
                 cw_sequence = cw_sequence + " "
             else:
