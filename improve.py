@@ -32,6 +32,7 @@ def print_training_plan(statistic):
 
 
 def compare_results(actual, expected):
+    mistakes = 0
     if len(actual) == len(expected):
         for index in range(len(actual)):
             result = compare.compare_parts(actual[index], expected[index])
@@ -39,8 +40,11 @@ def compare_results(actual, expected):
             print(expected[index])
             print(result[0])
             print(result[1].replace("r", " ").replace("m", " "))
+            mistakes = mistakes + len(result[1].replace("r", ""))
     else:
         print("Cannot compare results.")
+
+    print("Total mistakes: " + str(mistakes))
 
 
 test_file = get_content("random.txt")
