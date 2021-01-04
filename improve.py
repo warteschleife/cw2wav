@@ -3,9 +3,9 @@ from util import morse_table
 from util import compare
 
 ALPHABET_FILE = "alphabet.txt"
-HISTORY_FILE = "history.txt"
-TEST_FILE = "testfile.txt"
-RESULT_FILE = "resultfile.txt"
+HISTORY_FILE = "training_history.txt"
+TEST_FILE = "training_testfile.txt"
+RESULT_FILE = "training_resultfile.txt"
 
 
 def generate_test(char_weights):
@@ -68,6 +68,7 @@ def calculate_char_weights():
     with open(HISTORY_FILE, "r") as history_file:
         line = history_file.readline()
         while line:
+            mistakes_in_test = 0
             parts = line.split("|")
 
             given_text = list(map(lambda x: x.strip(), parts[0].split(" ")))
@@ -79,7 +80,8 @@ def calculate_char_weights():
                                                given_text[index])
 
                 marks = enumerate(result[1])
-
+                mistakes_in_test = mistakes_in_test + len(result[1].replace(
+                    "r", ""))
                 for enumerated_mark in marks:
                     mark = enumerated_mark[1]
 
@@ -96,7 +98,7 @@ def calculate_char_weights():
                         raise Exception()
 
             line = history_file.readline()
-
+            print("Mistakes: " + str(mistakes_in_test))
     return weights
 
 
@@ -107,15 +109,15 @@ def dump(char_weights):
     weight_list = list(
         enumerate(list(sorted(weight_list, key=lambda x: x[1], reverse=True))))
 
-    if len(weight_list) <= 10:
+    if len(weight_list) <= 20:
         for element in weight_list:
             print(
                 str(element[0]) + ". '" + (element[1][0] * element[1][1]) +
                 "'")
     else:
-        for element in weight_list[:5]:
+        for element in weight_list[:10]:
             print(str(element[0]) + ". '" + (element[1][0] * element[1][1]))
-        for element in weight_list[-5:]:
+        for element in weight_list[-10:]:
             print(str(element[0]) + ". '" + (element[1][0] * element[1][1]))
 
 
