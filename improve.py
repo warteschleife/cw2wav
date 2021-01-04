@@ -2,104 +2,159 @@ import sys, random, util
 from util import morse_table
 from util import compare
 
-alphabet = morse_table.get_morse_table("alphabet.txt")
+ALPHABET_FILE = "alphabet.txt"
+HISTORY_FILE = "history.txt"
+TEST_FILE = "testfile.txt"
+RESULT_FILE = "resultfile.txt"
 
-test_file = None
-result_file = None
-history_file = None
+
+def generate_test(char_weights):
+    char_source = "".join(
+        list(map(lambda x: x * char_weights[x], char_weights.keys())))
+
+    test = []
+
+    for _ in range(5):
+        line = ""
+
+        for _ in range(10):
+            line = line + char_source[random.randrange(0, len(char_source))]
+
+        test.append(line)
+
+    return test
 
 
-def get_content(file_name):
+def store_in_history(test_content, end_marker):
+    with open(HISTORY_FILE, "a") as history_file:
+        history_file.write(" ".join(test_content).strip() + end_marker)
+
+
+def read_resultfile():
     try:
-        with open(file_name, "r") as file_handle:
-            return list(map(lambda x: x.strip(), file_handle.readlines()))
+        with open(RESULT_FILE, "r") as result_file:
+            return list(map(lambda x: x.strip(), result_file.readlines()))
     except:
         return None
 
 
-def print_training_plan(statistic):
-    results = []
-    for x in statistic.keys():
-        results.append((x, statistic[x]))
-    results = list(sorted(results, key=lambda x: x[1]))
-    header = ""
-    count = ""
-    for r in results:
-        header = header + r[0].rjust(3)
-        count = count + str(r[1]).rjust(3)
-    print(header)
-    print(count)
+def store_testfile(content, file_name=TEST_FILE):
+    with open(file_name, "w") as test_file:
+        for line in content:
+            test_file.write(line + "\n")
 
 
-def compare_results(actual, expected):
-    mistakes = 0
-    if len(actual) == len(expected):
-        for index in range(len(actual)):
-            result = compare.compare_parts(actual[index], expected[index])
-            print()
-            print(expected[index])
-            print(result[0])
-            print(result[1].replace("r", " ").replace("m", " "))
-            mistakes = mistakes + len(result[1].replace("r", ""))
+def get_last_stored_result():
+    last_stored_result = []
+    with open(HISTORY_FILE, "r") as history_file:
+        line = history_file.readline()
+        while line:
+            parts = line.split("|")
+            if len(parts[1]) > 0:
+                last_stored_result = list(
+                    map(lambda x: x.strip(), parts[1].split(" ")))
+            line = history_file.readline()
+    return last_stored_result
+
+
+def calculate_char_weights():
+    global alphabet
+
+    weights = {}
+
+    for letter in alphabet.keys():
+        weights[letter] = 1
+
+    with open(HISTORY_FILE, "r") as history_file:
+        line = history_file.readline()
+        while line:
+            parts = line.split("|")
+
+            given_text = list(map(lambda x: x.strip(), parts[0].split(" ")))
+            read_text = list(map(lambda x: x.strip(), parts[1].split(" ")))
+
+            for index in range(len(given_text)):
+
+                result = compare.compare_parts(read_text[index],
+                                               given_text[index])
+
+                marks = enumerate(result[1])
+
+                for enumerated_mark in marks:
+                    mark = enumerated_mark[1]
+
+                    position = enumerated_mark[0]
+
+                    letter = given_text[index][position]
+
+                    if mark == "m" or mark == "f":
+                        weights[letter] = weights[letter] + 2
+                    elif mark == "r":
+                        if weights[letter] > 1:
+                            weights[letter] = weights[letter] - 1
+                    else:
+                        raise Exception()
+
+            line = history_file.readline()
+
+    return weights
+
+
+def dump(char_weights):
+    weight_list = list(map(lambda x: (x, char_weights[x]),
+                           char_weights.keys()))
+
+    weight_list = list(
+        enumerate(list(sorted(weight_list, key=lambda x: x[1], reverse=True))))
+
+    if len(weight_list) <= 10:
+        for element in weight_list:
+            print(str(element[0]) + ". '" + (element[1][0] * element[1][1]))
     else:
-        print("Cannot compare results.")
+        for element in weight_list[:5]:
+            print(str(element[0]) + ". '" + (element[1][0] * element[1][1]))
+        for element in weight_list[-5:]:
+            print(str(element[0]) + ". '" + (element[1][0] * element[1][1]))
 
-    print("Total mistakes: " + str(mistakes))
 
+alphabet = morse_table.get_morse_table(ALPHABET_FILE)
 
-test_file = get_content("random.txt")
-result_file = get_content("result.txt")
+result = read_resultfile()
 
-if not result_file is None:
-    if len(test_file) == len(result_file):
-        line = " ".join(test_file) + " " + " ".join(result_file) + "\n"
-        with open("history.txt", "a") as history:
-            history.write(line)
-    compare_results(result_file, test_file)
+if result is None:
+    print("Initialized Training Environment")
+    weight = {}
+    for letter in alphabet.keys():
+        weight[letter] = 1
+    test = generate_test(weight)
 
-statistic = {}
-for k in alphabet.keys():
-    statistic[k] = 2
+    with open(HISTORY_FILE, "w"):
+        pass
 
-with open("history.txt", "r") as history:
-    line = history.readline()
-    while line:
-        elements = list(map(lambda x: x.strip(), line.split(" ")))
-        for index in range(int(len(elements) / 2)):
-            expected_result = elements[index]
-            actual_result = elements[index + int(len(elements) / 2)]
-            compare_result = compare.compare_parts(actual_result,
-                                                   expected_result)
-            mistakes = compare_result[1]
-            while expected_result:
-                if mistakes[0] == "f" or mistakes[0] == "m":
-                    if expected_result[0] in statistic.keys():
-                        if statistic[expected_result[0]] < 20:
-                            statistic[expected_result[0]] = statistic[
-                                expected_result[0]] + 2
-                    else:
-                        statistic[expected_result[0]] = 2
-                else:
-                    if expected_result[0] in statistic.keys():
-                        if statistic[expected_result[0]] > 1:
-                            statistic[expected_result[0]] = statistic[
-                                expected_result[0]] - 1
-                    else:
-                        statistic[expected_result[0]] = 1
+    store_in_history(test, "|")
 
-                mistakes = mistakes[1:]
-                expected_result = expected_result[1:]
-        line = history.readline()
+    store_testfile(test)
 
-characters = []
-for k in statistic.keys():
-    for _ in range(statistic[k]):
-        characters.append(k)
+    store_testfile(test, RESULT_FILE)
 
-print_training_plan(statistic)
+    exit()
 
-with open("random.txt", "w") as random_text:
-    for _ in range(5):
-        for _ in range(10):
-            random_text.write(characters[random.randrange(0, len(characters))])
-        random_text.write("\n")
+else:
+
+    last_result = get_last_stored_result()
+
+    if "#".join(last_result) == "#".join(result):
+        print("Seems like the test has not been performed.")
+        exit()
+
+    store_in_history(result, "\n")
+
+    char_weights = calculate_char_weights()
+
+    dump(char_weights)
+
+    test = generate_test(char_weights)
+
+    store_in_history(test, "|")
+
+    store_testfile(test)
