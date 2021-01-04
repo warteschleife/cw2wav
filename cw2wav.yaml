@@ -25,3 +25,20 @@ name: training_fast
 basis: default
 len_dit: 0.07
 character_gap: 0.9
+
+---
+# Dies ist die Zielgeschwindigkeit der Montagsgruppe
+# 16WPM/14WMP
+#
+name: montagsgruppe_ziel
+basis: default
+frequency: 500
+len_dit: 0.07
+character_gap: 0.35
+
+
+---
+name: montagsgruppe
+basis: montagsgruppe_ziel
+frequency: 440
+character_gap: 0.70
