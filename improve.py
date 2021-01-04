@@ -109,7 +109,9 @@ def dump(char_weights):
 
     if len(weight_list) <= 10:
         for element in weight_list:
-            print(str(element[0]) + ". '" + (element[1][0] * element[1][1]))
+            print(
+                str(element[0]) + ". '" + (element[1][0] * element[1][1]) +
+                "'")
     else:
         for element in weight_list[:5]:
             print(str(element[0]) + ". '" + (element[1][0] * element[1][1]))
