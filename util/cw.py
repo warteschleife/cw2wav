@@ -40,7 +40,7 @@ class CwGen:
 
         self._sampling_rate = sampling_rate
         self._tone_dit = self._generate_tone(len_dit, 100, ramp_time)
-        self._tone_dah = self._generate_tone(len_dah, 100, ramp_time * 3)
+        self._tone_dah = self._generate_tone(len_dah, 100, ramp_time)
         self._separate_tone = self._generate_tone(len_dit, 0, 0)
         self._separate_char = self._generate_tone(len_separate_char, 0, 0)
 
