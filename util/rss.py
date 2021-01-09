@@ -2,7 +2,9 @@ import requests
 import xml.sax as sax
 
 
-class Handler(sax.ContentHandler):
+class _RssAtomHandler(sax.ContentHandler):
+    """ This class should be able to parse RSS feeds as well as Atom feeds (at least some).
+    It just extracts the title and the summary/description of the feeds entries. """
     def __init__(self):
         self._element_stack = []
         self._summary_buffer = ""
@@ -12,9 +14,6 @@ class Handler(sax.ContentHandler):
         self._entry_stack = None
         self._closing_tag = None
         self._extracted_data = []
-
-    def startDocument(self):
-        pass
 
     def characters(self, text):
         if self._element_stack == self._summary_stack:
@@ -41,6 +40,7 @@ class Handler(sax.ContentHandler):
                 self._closing_tag = "item"
 
         self._element_stack.append(name)
+
         if self._element_stack == self._entry_stack:
             self._summary_buffer = ""
             self._title_buffer = ""
@@ -52,17 +52,16 @@ class Handler(sax.ContentHandler):
             self._extracted_data.append(self._title_buffer.strip())
             self._extracted_data.append(self._summary_buffer.strip())
 
-    def endDocument(self):
-        pass
-
     def get_lines(self):
         return self._extracted_data
 
 
 def get_text_from_feed(url):
+    """ The function returns the content of the feed that is selected by 'url' """
+
     content = requests.get(url).content
 
-    handler = Handler()
+    handler = _RssAtomHandler()
 
     sax.parseString(content, handler)
 
