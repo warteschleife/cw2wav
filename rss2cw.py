@@ -16,6 +16,10 @@ if __name__ == "__main__":
     configuration_name = sys.argv[1]
     feed_name = sys.argv[2]
     output_filename = sys.argv[3]
+    text_filename = None
+
+    if len(sys.argv) > 4:
+        text_filename = sys.argv[4]
 
     parameters = {
         "sampling_rate": 44000,
@@ -35,6 +39,10 @@ if __name__ == "__main__":
 
     try:
         text = get_text_from_feed(feed_name)
+
+        if not text_filename is None:
+            with open(text_filename, "w") as file_handle:
+                file_handle.write(text)
 
         cw_gen = CwGen(configuration.get_configuration(configuration_name),
                        alphabet)
