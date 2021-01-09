@@ -2,7 +2,7 @@ import math
 import wave
 
 
-class CwGen:
+class _CwGen:
     def __init__(self, configuration, alphabet):
 
         sampling_rate = configuration["sampling_rate"]
@@ -180,3 +180,9 @@ class CwGen:
         print("Anzahl Zeichen:     " + str(character_count))
         print("Woerter pro Minute: " + str(self.get_wmp()))
         self._write_wav_file(file_name, cw_sequence)
+
+
+def create_cw_soundfile(configuration, alphabet, text, output_filename):
+    cw_gen = _CwGen(configuration, alphabet)
+
+    cw_gen.generate(text, output_filename)

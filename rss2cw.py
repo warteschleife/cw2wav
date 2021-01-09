@@ -1,9 +1,9 @@
 import sys
 import winsound
 
-from util import morse_table
-from util import configuration
-from util.cw import CwGen
+from util.configuration import get_configuration
+from util.cw import create_cw_soundfile
+from util.morse_table import get_morse_table
 from util.rss import get_text_from_feed
 
 if __name__ == "__main__":
@@ -21,17 +21,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 4:
         text_filename = sys.argv[4]
 
-    parameters = {
-        "sampling_rate": 44000,
-        "len_dit": 0.1,
-        "ramp_time": None,
-        "frequency": 680
-    }
-
-    configuration = configuration.Configuration(parameters)
+    configuration = get_configuration(configuration_name)
 
     try:
-        alphabet = morse_table.get_morse_table("alphabet.txt")
+        alphabet = get_morse_table("alphabet.txt")
     except Exception as ex:
         print("Das Morsealphabet konnte nicht geladen werden:")
         print(ex)
@@ -44,11 +37,10 @@ if __name__ == "__main__":
             with open(text_filename, "w") as file_handle:
                 file_handle.write(text)
 
-        cw_gen = CwGen(configuration.get_configuration(configuration_name),
-                       alphabet)
-        cw_gen.generate(text, output_filename)
+        create_cw_soundfile(configuration, alphabet, text, output_filename)
 
         winsound.PlaySound(output_filename, winsound.SND_FILENAME)
+
     except Exception as ex:
         print(ex)
         exit(-1)
