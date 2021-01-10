@@ -1,3 +1,5 @@
+import getopt
+import getopt
 import sys
 import winsound
 
@@ -13,13 +15,35 @@ if __name__ == "__main__":
         )
         exit(-1)
 
-    configuration_name = sys.argv[1]
-    feed_name = sys.argv[2]
-    output_filename = sys.argv[3]
-    text_filename = None
+    opts, args = getopt.getopt(sys.argv[1:], "c:e:f:s:p:", [])
 
-    if len(sys.argv) > 4:
-        text_filename = sys.argv[4]
+    configuration_name = None
+    feed_name = None
+    output_filename = None
+    text_filename = None
+    entry_number = None
+
+    for option in opts:
+        if option[0] == "-c":
+            configuration_name = option[1]
+        if option[0] == "-f":
+            feed_name = option[1]
+        if option[0] == "-s":
+            output_filename = option[1]
+        if option[0] == "-p":
+            text_filename = option[1]
+        if option[0] == "-e":
+            entry_number = option[1]
+
+    if configuration_name is None:
+        print("Configuration name is missing (Option '-c')")
+        exit(-1)
+    if feed_name is None:
+        print("Feed URL is missing (Option '-f')")
+        exit(-1)
+    if output_filename is None:
+        print("Output filename is missing (Option '-s')")
+        exit(-1)
 
     configuration = get_configuration(configuration_name)
 
@@ -31,7 +55,7 @@ if __name__ == "__main__":
         exit(-1)
 
     try:
-        text = get_text_from_feed(feed_name)
+        text = get_text_from_feed(feed_name, entry_number)
 
         if not text_filename is None:
             with open(text_filename, "w") as file_handle:
