@@ -6,39 +6,31 @@ character_gap: 1.0
 
 ---
 name: slow
-basis: default
+base: default
 character_gap: 0.5
 
 ---
 name: improve
-basis: default
+base: default
 len_dit: 0.08
 
 ---
-name: training
-basis: default
-len_dit: 0.08
-character_gap: 1.0
-
----
-name: training_fast
-basis: default
-len_dit: 0.07
-character_gap: 0.9
-
----
-# Dies ist die Zielgeschwindigkeit der Montagsgruppe
-# 16WPM/14WMP
-#
-name: montagsgruppe_ziel
-basis: default
+# Goal: 16WPM/14WMP
+name: training_goal
+base: default
 frequency: 500
 len_dit: 0.07
 character_gap: 0.35
 
 
 ---
-name: montagsgruppe
-basis: montagsgruppe_ziel
+name: current_relaxed
+base: training_goal
 frequency: 440
 character_gap: 0.70
+
+---
+name: current_progress
+base: training_goal
+frequency: 440
+character_gap: 0.60

@@ -37,8 +37,8 @@ class _Configuration:
 
         path_names = [name]
 
-        while "basis" in configurations[0].keys():
-            parent = configurations[0]["basis"]
+        while "base" in configurations[0].keys():
+            parent = configurations[0]["base"]
 
             if parent in path_names:
                 raise Exception("Cyclic configuration!")
@@ -72,7 +72,7 @@ class _Configuration:
                 if parameter_name == "name":
                     continue
 
-                if parameter_name == "basis":
+                if parameter_name == "base":
                     continue
 
                 result[parameter_name] = element[parameter_name]
