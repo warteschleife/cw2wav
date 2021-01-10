@@ -9,12 +9,6 @@ from util.morse_table import get_morse_table
 from util.rss import get_text_from_feed
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print(
-            "Der Aufruf benötigt die Parameter 'Konfigurationsname', 'Feed URL', 'Ausgabedatei'."
-        )
-        exit(-1)
-
     opts, args = getopt.getopt(sys.argv[1:], "c:e:f:s:p:", [])
 
     configuration_name = None
