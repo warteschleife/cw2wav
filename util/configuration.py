@@ -1,8 +1,16 @@
 import yaml
 
 
-class Configuration:
-    def __init__(self, default_settings):
+class _Configuration:
+    def __init__(
+        self,
+        default_settings={
+            "sampling_rate": 44000,
+            "len_dit": 0.1,
+            "ramp_time": None,
+            "frequency": 680
+        }):
+
         with open("cw2wav.yaml", "r") as config_file:
 
             self._default_settings = default_settings
@@ -29,8 +37,8 @@ class Configuration:
 
         path_names = [name]
 
-        while "basis" in configurations[0].keys():
-            parent = configurations[0]["basis"]
+        while "base" in configurations[0].keys():
+            parent = configurations[0]["base"]
 
             if parent in path_names:
                 raise Exception("Cyclic configuration!")
@@ -64,7 +72,7 @@ class Configuration:
                 if parameter_name == "name":
                     continue
 
-                if parameter_name == "basis":
+                if parameter_name == "base":
                     continue
 
                 result[parameter_name] = element[parameter_name]
@@ -89,3 +97,7 @@ class Configuration:
                   str(result[k]) + "' gesetzt." + source_info)
 
         return result
+
+
+def get_configuration(name):
+    return _Configuration().get_configuration(name)
