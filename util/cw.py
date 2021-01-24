@@ -166,6 +166,9 @@ class _CwGen:
         total_time = signal_sequence_count / self._sampling_rate
         return 60 / total_time
 
+    def get_bpm(self):
+        return self.get_wmp() * 5
+
     def generate(self, text, file_name):
         text = self._simplyfy(text)
         cw_sequence = self._create_cw_sequence(text)
@@ -178,6 +181,7 @@ class _CwGen:
         print("---------------------")
         print("Gesamtdauer:        " + self._seconds2minuteAsText(total_time))
         print("Anzahl Zeichen:     " + str(character_count))
+        print("Zeichen pro Minute: " + str(60 * character_count / total_time))
         print("Woerter pro Minute: " + str(self.get_wmp()))
         self._write_wav_file(file_name, cw_sequence)
 
