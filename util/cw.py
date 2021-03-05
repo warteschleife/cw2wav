@@ -2,6 +2,11 @@ import math
 import wave
 
 
+def calc_paris_bpm(dit_length):
+    length = dit_length * 50
+    return (5 * 60) / length
+
+
 class _CwGen:
     def __init__(self, configuration, alphabet):
 
@@ -43,6 +48,9 @@ class _CwGen:
         self._tone_dah = self._generate_tone(len_dah, 100, ramp_time)
         self._separate_tone = self._generate_tone(len_dit, 0, 0)
         self._separate_char = self._generate_tone(len_separate_char, 0, 0)
+
+        self._paris_cpm = int(calc_paris_bpm(len_dit))
+        self._paris_wpm = int(calc_paris_bpm(len_dit) / 5)
 
         self._alphabet = alphabet
 
@@ -179,10 +187,14 @@ class _CwGen:
         print()
         print("Details zur Aufnahme:")
         print("---------------------")
-        print("Gesamtdauer:        " + self._seconds2minuteAsText(total_time))
-        print("Anzahl Zeichen:     " + str(character_count))
-        print("Zeichen pro Minute: " + str(60 * character_count / total_time))
-        print("Woerter pro Minute: " + str(self.get_wmp()))
+        print("Gesamtdauer:                " +
+              self._seconds2minuteAsText(total_time))
+        print("Anzahl Zeichen:             " + str(character_count))
+        print("Zeichen pro Minute:         " +
+              str(60 * character_count / total_time))
+        print("Woerter pro Minute:         " + str(self.get_wmp()))
+        print("Zeichen pro Minute (PARIS): " + str(self._paris_cpm))
+        print("Woerter pro Minute (PARIS): " + str(self._paris_wpm))
         self._write_wav_file(file_name, cw_sequence)
 
 
