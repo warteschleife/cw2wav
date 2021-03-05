@@ -9,50 +9,29 @@ def calc_paris_bpm(dit_length):
 
 class _CwGen:
     def __init__(self, configuration, alphabet):
+        self._len_separate_char = 1.8
+        self._len_dit = 0.6
+        self._ramp_time = self._len_dit / 8
+        self._paris_cpm = 0
+        self._paris_wmp = 0
+        self._tone_dit = 0
+        self._tone_dah = 0
+        self._separate_tone = None
+        self._separate_char = None
 
-        sampling_rate = configuration["sampling_rate"]
+    def _prepare_tones(self):
 
-        len_dit = configuration["len_dit"]
+        len_dah = 3 * self._len_dit
 
-        len_separate_char = configuration["character_gap"]
+        self._tone_dit = self._generate_tone(self._len_dit, 100,
+                                             self._ramp_time)
+        self._tone_dah = self._generate_tone(len_dah, 100, self._ramp_time)
+        self._separate_tone = self._generate_tone(self._len_dit, 0, 0)
+        self._separate_char = self._generate_tone(self._len_separate_char, 0,
+                                                  0)
 
-        if not configuration["character_gap"] is None:
-            len_separate_char = configuration["character_gap"]
-        else:
-            len_separate_char = 3 * len_dit
-
-        if not configuration["ramp_time"] is None:
-            ramp_time = configuration["ramp_time"]
-        else:
-            ramp_time = len_dit / 8
-
-        self._frequency = configuration["frequency"]
-
-        len_dah = 3 * len_dit
-
-        print()
-        print("Die folgenden Einstellungen werden genutzt:")
-        print("-------------------------------------------")
-        print("Dauer eines DIT:                       " + str(len_dit) + " s")
-        print("Dauer eines DAH:                       " + str(len_dah) + " s")
-        print("Zeit zwischen zwei Zeichen:            " +
-              str(len_separate_char) + " s")
-        print("Dauer der steigenden/fallenden Flanke: " + str(ramp_time) +
-              " s")
-        print("Samplerate:                            " + str(sampling_rate))
-        print("Tonfrequenz:                           " +
-              str(self._frequency) + " Hz")
-
-        self._sampling_rate = sampling_rate
-        self._tone_dit = self._generate_tone(len_dit, 100, ramp_time)
-        self._tone_dah = self._generate_tone(len_dah, 100, ramp_time)
-        self._separate_tone = self._generate_tone(len_dit, 0, 0)
-        self._separate_char = self._generate_tone(len_separate_char, 0, 0)
-
-        self._paris_cpm = int(calc_paris_bpm(len_dit))
-        self._paris_wpm = int(calc_paris_bpm(len_dit) / 5)
-
-        self._alphabet = alphabet
+        self._paris_cpm = int(calc_paris_bpm(self._len_dit))
+        self._paris_wpm = int(calc_paris_bpm(self._len_dit) / 5)
 
     def _generate_tone(self, duration, volume, ramp_time):
         samples = bytearray()
@@ -79,7 +58,7 @@ class _CwGen:
 
         return samples
 
-    def _simplyfy(self, input_text):
+    def _simplify(self, input_text):
         simplified = input_text.lower()
         mappings = [("!", "."), ("ä", "ae"), ("ö", "oe"), ("ü", "ue"),
                     ("ß", "ss"), ("@", "at"), ("+", "plus")]
@@ -178,7 +157,8 @@ class _CwGen:
         return self.get_wmp() * 5
 
     def generate(self, text, file_name):
-        text = self._simplyfy(text)
+        self._prepare_tones()
+        text = self._simplify(text)
         cw_sequence = self._create_cw_sequence(text)
         signal_sequence_count = self._calculate_sample_count(cw_sequence)
         total_time = signal_sequence_count / self._sampling_rate
@@ -197,8 +177,38 @@ class _CwGen:
         print("Woerter pro Minute (PARIS): " + str(self._paris_wpm))
         self._write_wav_file(file_name, cw_sequence)
 
+    def set_sampling_rate(self, sr):
+        self._sampling_rate = sr
+
+    def set_len_dit(self, ld):
+        self._len_dit = ld
+
+    def set_len_separate_char(self, ls):
+        self._len_separate_char = ls
+
+    def set_frequency(self, f):
+        self._frequency = f
+
+    def set_ramp_time(self, r):
+        self._ramp_time = r
+
+    def set_alphabet(self, a):
+        self._alphabet = a
+
 
 def create_cw_soundfile(configuration, alphabet, text, output_filename):
     cw_gen = _CwGen(configuration, alphabet)
+
+    cw_gen.set_sampling_rate(configuration["sampling_rate"])
+    cw_gen.set_len_dit(configuration["len_dit"])
+    cw_gen.set_len_separate_char(configuration["character_gap"])
+    cw_gen.set_frequency(configuration["frequency"])
+
+    if configuration["ramp_time"]:
+        cw_gen.set_ramp_time(configuration["ramp_time"])
+    else:
+        cw_gen.set_ramp_time(configuration["len_dit"] / 8)
+
+    cw_gen.set_alphabet(alphabet)
 
     cw_gen.generate(text, output_filename)
