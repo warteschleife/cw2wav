@@ -47,3 +47,33 @@ name: slow
 frequency: 400-800
 len_dit: 0.1
 character_gap: 0.3
+
+---
+name: ov-training-1
+frequency: 500-750
+len_dit: 0.065
+character_gap: 0.80
+
+---
+name: ov-training-2
+frequency: 500-750
+len_dit: 0.055
+character_gap: 0.70
+
+---
+name: ov-training-3
+frequency: 500-750
+len_dit: 0.065
+character_gap: 0.40
+
+---
+name: ov-training-4
+frequency: 500-750
+len_dit: 0.065
+character_gap: 0.30
+
+---
+name: ov-training-goal
+frequency: 500-750
+len_dit: 0.065
+character_gap: 0.20
