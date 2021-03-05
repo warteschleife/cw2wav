@@ -5,14 +5,21 @@
 # cw2wav
 ## Übersicht
 
-Kern des Projekts ist das Python Skript `cw2wav.py`. Mit diesem Skript kann der Inhalt einer normalen Text Datei in ein Soundfile nach Wave Format umgewandelt werden, welches den Text als Morsezeichen enthält. Nachdem die Sounddatei erzeugt wurde, wird sie auch sofort abgespielt.
+Kern des Projekts ist eine Klasse, die aus einem Text eine WAV Sounddatei mit CW generieren kann. Rund um diese Klasse gibt es ein paar Skripte, mit denen Übrungstexte auf verschiedene Arten erzeugt werden können.
 
-In dem Projekt sind noch weitere Dateien enthalten:
+### cw2wav.py
 
-- `cw2wav.yaml`: In dieser Datei sind Parameter gespeichert, die beim Erzeugen des Morsecodes beachtet werden sollen. Das sind Zeichenlängen, Tonfrequenz, Samplingrate usw.
-- `alphabet.txt`: In dieser Datei sind die eigentlichen Morsezeichen definiert.
+Mit diesem Skript kann der Inhalt einer normalen Text Datei in ein Soundfile nach Wave Format umgewandelt werden, welches den Text als Morsezeichen enthält. Nachdem die Sounddatei erzeugt wurde, wird sie auch sofort abgespielt.
 
-Zum Projekt gehört auch das Skript `randomwords.py`. Damit können Textdateien erzeugt werden, die Wörter aus 5 zufällig ausgewählten Zeichen beinhalten.
+### randomwords.py
+
+Dieses Skript spielt erzeugt eine Textdatei mit zufälligem Inhalt. Um den Text als CW zu hören, muss man auf cw2wav.py zurückgreifen.
+### improve.py
+
+Dieses Skript ist eine Art Weiterentwicklung von randomwords.py. Es wird ebenfalls in Verbindung mit cw2wav.py verwendet. Dem Skript kann man die eigenen Ergebnisse des letzten Durchgangs übergeben. Das Skript analysiert das Ergebnis und erkennt die Zeichen, die falsch erkannt wurden. Es führt eine ganze Historie. Anhand dieser Historie legt das Programm fest, welche Zeichen häufiger geübt werden sollen und welche weniger häufig.
+### rss2cw.py
+
+Mit diesem Skript kann man direkt auf RSS/Atom Feeds zugreifen und sich die Einträge vorlesen lassen. Das funktioniert mit einer Reihe von Webseiten. Der RSS/Atom Support ist allerdings eher rudimentär.
 
 ## Voraussetzungen
 

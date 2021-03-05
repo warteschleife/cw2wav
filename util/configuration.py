@@ -1,4 +1,6 @@
 import yaml
+import random
+import re
 
 
 class _Configuration:
@@ -55,6 +57,17 @@ class _Configuration:
 
         return configurations
 
+    def _replace_range_by_random(self, text):
+        elements = re.match("(\\d+)-(\\d+)", str(text))
+
+        if elements:
+            lower = int(elements.group(1))
+            higher = int(elements.group(2))
+            selected = random.randrange(lower, higher)
+            return selected
+
+        return text
+
     def get_configuration(self, name):
         path = self._get_inheritance_path(name)
 
@@ -75,7 +88,8 @@ class _Configuration:
                 if parameter_name == "base":
                     continue
 
-                result[parameter_name] = element[parameter_name]
+                result[parameter_name] = self._replace_range_by_random(
+                    element[parameter_name])
 
                 sources[parameter_name] = configuration_name
 

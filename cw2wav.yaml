@@ -32,5 +32,18 @@ character_gap: 0.70
 ---
 name: current_progress
 base: training_goal
-frequency: 440
-character_gap: 0.60
+frequency: 400-800
+character_gap: 0.40
+
+---
+name: speed
+base: training_goal
+frequency: 400-800
+character_gap: 0.35
+len_dit: 0.06
+
+---
+name: slow
+frequency: 400-800
+len_dit: 0.1
+character_gap: 0.3
