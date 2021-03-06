@@ -1,5 +1,3 @@
-**Wichtiger Hinweis:** Ursprünglich fehlte die Datei `cw2wav.yaml` im GitHub Repository. Damit konnten die unten aufgeführten Anweisungen nicht funktionieren. Inzwischen habe ich die Datei hinzugefügt.
-
 **Vorrede:** *Dies ist ein Miniprojekt unter vielen und bietet auch wirklich keine Funktionen, die nicht auch von anderen frei verfügbaren Programmen und Diensten bereitgestellt werden.*
  
 # cw2wav
@@ -9,7 +7,7 @@ Kern des Projekts ist eine Klasse, die aus einem Text eine WAV Sounddatei mit CW
 
 ### cw2wav.py
 
-Mit diesem Skript kann der Inhalt einer normalen Text Datei in ein Soundfile nach Wave Format umgewandelt werden, welches den Text als Morsezeichen enthält. Nachdem die Sounddatei erzeugt wurde, wird sie auch sofort abgespielt.
+Mit diesem Skript kann der Inhalt einer normalen Text Datei in ein Soundfile nach Wave Format umgewandelt werden, welches den Text als Morsezeichen enthält.
 
 ### randomwords.py
 
