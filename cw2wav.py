@@ -1,6 +1,10 @@
 import sys
+import importlib
 
-import winsound
+winsound_support = False
+if importlib.util.find_spec("winsound"):
+    import winsound
+    winsound_support = True
 
 from util.morse_table import get_morse_table
 from util.configuration import get_configuration
@@ -43,7 +47,8 @@ if __name__ == "__main__":
 
             print("Dauer: " + get_time_string(duration))
 
-            winsound.PlaySound(output_filename, winsound.SND_FILENAME)
+            if winsound_support:
+                winsound.PlaySound(output_filename, winsound.SND_FILENAME)
         except Exception as ex:
             print("Error: " + ex)
             exit(-1)
