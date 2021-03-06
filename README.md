@@ -23,6 +23,8 @@ Mit diesem Skript kann man direkt auf RSS/Atom Feeds zugreifen und sich die Eint
 
 Da es sich um ein Python Projekt handelt, sollte ein Python Interpreter vorhanden sein. Ich habe es mit der Version `3.7.4` auf einem Windows-Rechner getestet. Eventuell müssen einige Python-Module nachinstalliert werden. Das sollte aber mit `pip` normalerweise kein Problem sein.
 
+Nachdem die WAV Datei erzeugt wurde, spielt das Skript cw2wav.py diese auch ab, sofern das Modul 'winsound' installiert ist. Andernfalls endet das Skript mit dem Speichern der WAV-Datei
+
 ## Vorbereitung
 
 Zunächst sollte man sich das ZIP-Archiv des Projekts von der Webseite laden. Diese Möglichkeit eröffnet sich, wenn man den grünen "Code"-Button oben rechts drückt.
