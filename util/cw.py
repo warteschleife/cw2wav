@@ -24,7 +24,7 @@ class Envelope:
 
 
 class _CwGen:
-    def __init__(self, configuration, alphabet):
+    def __init__(self):
         self._len_separate_char = 1.8
         self._len_dit = 0.6
         self._ramp_time = self._len_dit / 8
@@ -34,6 +34,8 @@ class _CwGen:
         self._tone_dah = 0
         self._separate_tone = None
         self._separate_char = None
+        self._num_samples = 0
+        self._frequency = 1
 
     def _prepare_tones(self):
 
@@ -41,12 +43,16 @@ class _CwGen:
 
         self._tone_dit = self._generate_tone(self._len_dit, 100,
                                              self._ramp_time)
+
         self._tone_dah = self._generate_tone(len_dah, 100, self._ramp_time)
+
         self._separate_tone = self._generate_tone(self._len_dit, 0, 0)
+
         self._separate_char = self._generate_tone(self._len_separate_char, 0,
                                                   0)
 
         self._paris_cpm = int(calc_paris_bpm(self._len_dit))
+
         self._paris_wpm = int(calc_paris_bpm(self._len_dit) / 5)
 
     def _generate_tone(self, duration, volume, ramp_time):
@@ -71,38 +77,52 @@ class _CwGen:
 
         return samples
 
-    def _simplify(self, input_text):
-        simplified = input_text.lower()
+    def _replace_mutual_vowels(self, text):
+        text = text.lower()
         mappings = [("!", "."), ("ä", "ae"), ("ö", "oe"), ("ü", "ue"),
                     ("ß", "ss"), ("@", "at"), ("+", "plus")]
 
         for m in mappings:
-            simplified = simplified.replace(m[0], m[1])
+            text = text.replace(m[0], m[1])
 
-        chars = []
-        for c in simplified:
-            if (not c in chars) and (not c in self._alphabet.keys() and
-                                     (not c == ' ')):
-                chars.append(c)
+        return text
 
-        if chars:
-            print()
-            print(
-                "Einige Zeichen stehen nicht als Morsezeichen bereit und werden durch Leerzeichen ersetzt:"
-            )
+    def _remove_unknown_chars(self, text):
+        unknown_chars = []
 
-            for c in chars:
-                print("- '" + c + "'")
-                simplified = simplified.replace(c, " ")
+        for char in text:
+            if char in self._cw_codes.keys():
+                continue
+            if char == " ":
+                continue
+            if char in unknown_chars:
+                continue
+            unknown_chars.append(char)
 
-        len_text = len(simplified)
-        simplified = simplified.replace("  ", " ")
+        for char in unknown_chars:
+            while char in text:
+                text = text.replace(char, " ")
 
-        while len(simplified) < len_text:
-            len_text = len(simplified)
-            simplified = simplified.replace("  ", " ")
+        return text
 
-        return simplified
+    def _trim_spaces(self, text):
+        while "  " in text:
+            text = text.replace("  ", " ")
+        return text
+
+    def _simplify_text(self, text):
+        """ The method first replaces some chars by alternative char
+        sequences and replaces characters that are not covered by the
+        used alphabet by spaces. Finally sequences of spaces are reduced
+        to single spaces."""
+
+        text = self._replace_mutual_vowels(text)
+
+        text = self._remove_unknown_chars(text)
+
+        text = self._trim_spaces(text)
+
+        return text
 
     def _create_cw_sequence(self, plain_text):
         cw_sequence = ""
@@ -112,28 +132,31 @@ class _CwGen:
                 cw_sequence = cw_sequence + " "
                 cw_sequence = cw_sequence + " "
             else:
-                if not t in self._alphabet.keys():
+                if not t in self._cw_codes.keys():
                     raise Exception("Character '" + t +
                                     "' is missing in morse table.")
 
-                cw_sequence = cw_sequence + self._alphabet[t]
+                cw_sequence = cw_sequence + self._cw_codes[t]
                 cw_sequence = cw_sequence + " "
         return cw_sequence
 
-    def _calculate_sample_count(self, cw_sequence):
-        num_samples = 0
+    def _calculate_sample_metrics(self, cw_sequence):
+        self._num_samples = 0
 
         for t in cw_sequence:
             if t == ".":
-                num_samples = num_samples + len(self._tone_dit)
-                num_samples = num_samples + len(self._separate_tone)
+                self._num_samples = self._num_samples + len(self._tone_dit)
+                self._num_samples = self._num_samples + len(
+                    self._separate_tone)
             elif t == "-":
-                num_samples = num_samples + len(self._tone_dah)
-                num_samples = num_samples + len(self._separate_tone)
+                self._num_samples = self._num_samples + len(self._tone_dah)
+                self._num_samples = self._num_samples + len(
+                    self._separate_tone)
             elif t == " ":
-                num_samples = num_samples + len(self._separate_char)
+                self._num_samples = self._num_samples + len(
+                    self._separate_char)
 
-        return num_samples
+        self._duration_seconds = self._num_samples / self._sampling_rate
 
     def _write_samples(self, file_handle, cw_sequence):
         for t in cw_sequence:
@@ -149,46 +172,24 @@ class _CwGen:
     def _write_wav_file(self, file_name, sequence):
 
         with wave.open(file_name, "wb") as w:
-            w.setnframes(self._calculate_sample_count(sequence))
+            w.setnframes(self._num_samples)
             w.setnchannels(1)
             w.setsampwidth(1)
             w.setframerate(self._sampling_rate)
             self._write_samples(w, sequence)
 
-    def _seconds2minuteAsText(self, total_time_seconds):
-        minutes = int(total_time_seconds / 60)
-        seconds = int(total_time_seconds - minutes * 60)
-        return str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
-
-    def get_wmp(self):
-        cw_sequence = self._create_cw_sequence("paris")
-        signal_sequence_count = self._calculate_sample_count(cw_sequence)
-        total_time = signal_sequence_count / self._sampling_rate
-        return 60 / total_time
-
-    def get_bpm(self):
-        return self.get_wmp() * 5
-
     def generate(self, text, file_name):
         self._prepare_tones()
-        text = self._simplify(text)
-        cw_sequence = self._create_cw_sequence(text)
-        signal_sequence_count = self._calculate_sample_count(cw_sequence)
-        total_time = signal_sequence_count / self._sampling_rate
-        character_count = len(text.replace(" ", ""))
 
-        print()
-        print("Details zur Aufnahme:")
-        print("---------------------")
-        print("Gesamtdauer:                " +
-              self._seconds2minuteAsText(total_time))
-        print("Anzahl Zeichen:             " + str(character_count))
-        print("Zeichen pro Minute:         " +
-              str(60 * character_count / total_time))
-        print("Woerter pro Minute:         " + str(self.get_wmp()))
-        print("Zeichen pro Minute (PARIS): " + str(self._paris_cpm))
-        print("Woerter pro Minute (PARIS): " + str(self._paris_wpm))
+        text = self._simplify_text(text)
+
+        cw_sequence = self._create_cw_sequence(text)
+
+        self._calculate_sample_metrics(cw_sequence)
+
         self._write_wav_file(file_name, cw_sequence)
+
+        return self._duration_seconds
 
     def set_sampling_rate(self, sr):
         self._sampling_rate = sr
@@ -205,12 +206,12 @@ class _CwGen:
     def set_ramp_time(self, r):
         self._ramp_time = r
 
-    def set_alphabet(self, a):
-        self._alphabet = a
+    def set_cw_codes(self, a):
+        self._cw_codes = a
 
 
 def create_cw_soundfile(configuration, alphabet, text, output_filename):
-    cw_gen = _CwGen(configuration, alphabet)
+    cw_gen = _CwGen()
 
     cw_gen.set_sampling_rate(configuration["sampling_rate"])
     cw_gen.set_len_dit(configuration["len_dit"])
@@ -222,6 +223,6 @@ def create_cw_soundfile(configuration, alphabet, text, output_filename):
     else:
         cw_gen.set_ramp_time(configuration["len_dit"] / 8)
 
-    cw_gen.set_alphabet(alphabet)
+    cw_gen.set_cw_codes(alphabet)
 
-    cw_gen.generate(text, output_filename)
+    return cw_gen.generate(text, output_filename)
