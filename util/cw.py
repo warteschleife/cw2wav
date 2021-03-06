@@ -7,6 +7,22 @@ def calc_paris_bpm(dit_length):
     return (5 * 60) / length
 
 
+class Envelope:
+    def __init__(self, num_samples, rampup_samples):
+        self._num_samples = num_samples
+        self._rampup_samples = rampup_samples
+
+    def get(self, sample_index):
+        if self._rampup_samples == 0:
+            return 1
+        if sample_index <= self._rampup_samples:
+            return sample_index / self._rampup_samples
+        elif sample_index >= (self._num_samples - self._rampup_samples):
+            return (self._num_samples - sample_index) / self._rampup_samples
+        else:
+            return 1
+
+
 class _CwGen:
     def __init__(self, configuration, alphabet):
         self._len_separate_char = 1.8
@@ -42,17 +58,14 @@ class _CwGen:
 
         num_ramp_samples = int(self._sampling_rate * ramp_time)
 
+        envelope = Envelope(num_samples, num_ramp_samples)
+
         for n in range(num_samples):
             angle = (n / samples_per_period) * 2 * math.pi
 
-            if n < num_ramp_samples:
-                modulation = n / num_ramp_samples
-            elif n > (num_samples - num_ramp_samples):
-                modulation = (num_samples - n) / num_ramp_samples
-            else:
-                modulation = 1
+            envelope_value = envelope.get(n)
 
-            value = int((math.sin(angle) * volume * modulation) + 127)
+            value = int((math.sin(angle) * volume * envelope_value) + 127)
 
             samples.append(value)
 
