@@ -6,6 +6,14 @@ from util.morse_table import get_morse_table
 from util.configuration import get_configuration
 from util.cw import create_cw_soundfile
 
+
+def get_time_string(seconds):
+    seconds = int(seconds)
+    minutes = int(seconds / 60)
+    seconds = seconds - minutes * 60
+    return str(minutes) + ":" + str(seconds).zfill(2)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         print(
@@ -30,9 +38,12 @@ if __name__ == "__main__":
         text = (" ".join(textfile.readlines())).replace("\n", "=")
 
         try:
-            create_cw_soundfile(configuration, alphabet, text, output_filename)
+            duration = create_cw_soundfile(configuration, alphabet, text,
+                                           output_filename)
+
+            print("Dauer: " + get_time_string(duration))
 
             winsound.PlaySound(output_filename, winsound.SND_FILENAME)
         except Exception as ex:
-            print(ex)
+            print("Error: " + ex)
             exit(-1)
