@@ -1,7 +1,7 @@
 import re
 
 
-def get_morse_table(file_name):
+def get_cw_table(file_name):
     result = {}
     with open(file_name, "r") as morse_table:
         for line in morse_table.readlines():

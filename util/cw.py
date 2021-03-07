@@ -213,16 +213,21 @@ class _CwGen:
 def create_cw_soundfile(configuration, alphabet, text, output_filename):
     cw_gen = _CwGen()
 
+    defaults = {
+        "sampling_rate": 44000,
+        "ramp_time": configuration["len_dit"] / 8,
+        "character_gap": configuration["len_dit"] * 3,
+    }
+
+    for key in defaults.keys():
+        if not key in configuration.keys():
+            configuration[key] = defaults[key]
+
     cw_gen.set_sampling_rate(configuration["sampling_rate"])
     cw_gen.set_len_dit(configuration["len_dit"])
     cw_gen.set_len_separate_char(configuration["character_gap"])
     cw_gen.set_frequency(configuration["frequency"])
-
-    if configuration["ramp_time"]:
-        cw_gen.set_ramp_time(configuration["ramp_time"])
-    else:
-        cw_gen.set_ramp_time(configuration["len_dit"] / 8)
-
+    cw_gen.set_ramp_time(configuration["ramp_time"])
     cw_gen.set_cw_codes(alphabet)
 
     return cw_gen.generate(text, output_filename)

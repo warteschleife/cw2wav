@@ -6,7 +6,7 @@ if importlib.util.find_spec("winsound"):
     import winsound
     winsound_support = True
 
-from util.morse_table import get_morse_table
+from util.morse_table import get_cw_table
 from util.configuration import get_configuration
 from util.cw import create_cw_soundfile
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     configuration = get_configuration(configuration_name)
 
     try:
-        alphabet = get_morse_table("alphabet.txt")
+        alphabet = get_cw_table("alphabet.txt")
     except Exception as ex:
         print("Das Morsealphabet konnte nicht geladen werden:")
         print(ex)
