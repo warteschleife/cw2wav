@@ -1,3 +1,22 @@
+# The 'default' entry should always be present. As its name tells, it is used
+# when no other configuration is selected.
+#
+# 'frequency':     Frequency of the tone in Hz. It can be an integer or two
+#                  integers separated by '-' in the form "XXX-YYY". Then, the
+#                  actual frequency is chosen randomly in the range from XXX
+#                  and YYY
+#
+# 'len_dit':       Length of a 'dit' in seconds.
+#
+# 'character_gap': Length of the gap between characters in seconds. If this
+#                  parameter is missing, 3 x len_dit is applied.
+#
+# 'cw_table':      File that contains the CW-code table.
+#
+# 'base':          This field is optional and defines another configuration
+#                  where those parameters should be looked up, that are not
+#                  given in the current configuration. So, it is possible to
+#                  derive a configuration from another.
 default:
   frequency: 440
   len_dit: 0.08
@@ -8,12 +27,14 @@ slow:
   base: default
   character_gap: 0.5
 
-improve:
-  base: default
-  len_dit: 0.08
-
 ov-training:
   base: default
   frequency: 500-750
   len_dit: 0.055
   character_gap: 0.70
+
+advanced-training:
+  base: default
+  frequency: 500-750
+  len_dit: 0.055
+  character_gap: 0.50
