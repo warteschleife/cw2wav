@@ -116,11 +116,13 @@ class _CwGen:
         used alphabet by spaces. Finally sequences of spaces are reduced
         to single spaces."""
 
-        text = self._replace_mutual_vowels(text)
+        updates = [
+            self._replace_mutual_vowels, self._remove_unknown_chars,
+            self._trim_spaces
+        ]
 
-        text = self._remove_unknown_chars(text)
-
-        text = self._trim_spaces(text)
+        for update in updates:
+            text = update(text)
 
         return text
 
