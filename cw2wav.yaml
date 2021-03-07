@@ -1,21 +1,19 @@
----
-name: default
-frequency: 440
-len_dit: 0.08
-character_gap: 1.0
+default:
+  frequency: 440
+  len_dit: 0.08
+  character_gap: 1.0
+  cw_table: "alphabet.txt"
 
----
-name: slow
-base: default
-character_gap: 0.5
+slow:
+  base: default
+  character_gap: 0.5
 
----
-name: improve
-base: default
-len_dit: 0.08
+improve:
+  base: default
+  len_dit: 0.08
 
----
-name: ov-training
-frequency: 500-750
-len_dit: 0.055
-character_gap: 0.70
+ov-training:
+  base: default
+  frequency: 500-750
+  len_dit: 0.055
+  character_gap: 0.70

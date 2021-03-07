@@ -1,3 +1,5 @@
+# TODO: Clean up!
+
 import getopt
 import getopt
 import re
@@ -8,11 +10,13 @@ import os
 
 from util.configuration import get_configuration
 from util.cw import create_cw_soundfile
-from util.morse_table import get_morse_table
+from util.morse_table import get_cw_table
 from util.rss import get_text_from_feed
 
 
-def get_file_identifier(basepatterns):
+def get_tmp_file_identifier(basepatterns):
+    """ This function returns an identifier for file name that is not in use
+    in the current directory. """
     id = 1
     for name in os.listdir():
         for pattern in basepatterns:
@@ -41,35 +45,20 @@ except:
 yaml_content = yaml.load_all(text, Loader=yaml.FullLoader)
 
 if yaml_content:
-    for element in yaml_content:
-        if "name" in element.keys() and "url" in element.keys():
-            feeds[element["name"]] = element["url"]
-        else:
-            print("An entry in the file 'feeds.txt' couldn't be read.")
-            name_found = False
-            url_found = False
-            for k in element.keys():
-                if k == "name":
-                    name_found = True
-                elif k == "url":
-                    url_found = True
-                else:
-                    print("Element '" + k + "' is unknown. Typo?")
-            if not name_found:
-                print("The mandatory field 'name' is missing.")
-            if not url_found:
-                print("The mandatory field 'url' is missing.")
-            exit()
+    for yaml_part in yaml_content:
+        for feed_name in yaml_part.keys():
+            feeds[feed_name] = yaml_part[feed_name]
 
 if __name__ == "__main__":
     opts, args = getopt.getopt(sys.argv[1:], "a:c:e:f:s:p:hn", [])
 
-    name_identifier = get_file_identifier([("tmp-", ".wav"), ("tmp-", ".txt")])
+    output_file_identifier = get_tmp_file_identifier([("tmp-", ".wav"),
+                                                      ("tmp-", ".txt")])
 
     configuration_name = "default"
     feed_name = None
-    output_filename = "tmp-" + name_identifier + ".wav"
-    text_filename = "tmp-" + name_identifier + ".txt"
+    output_filename = "tmp-" + output_file_identifier + ".wav"
+    text_filename = "tmp-" + output_file_identifier + ".txt"
     entry_number = None
     alphabet_file = "alphabet.txt"
     help_requested = False
@@ -81,7 +70,7 @@ if __name__ == "__main__":
         if option[0] == "-a":
             alphabet_file = option[1]
         if option[0] == "-f":
-            feed_name = feeds[option[1]]
+            feed_url = feeds["feeds"][option[1]]["url"]
         if option[0] == "-s":
             output_filename = option[1]
         if option[0] == "-p":
@@ -94,7 +83,7 @@ if __name__ == "__main__":
             play_sound = False
 
     if help_requested:
-        feednames = sorted(feeds.keys())
+        feednames = sorted(feeds["feeds"].keys())
         for name in feednames:
             print("- " + name)
 
@@ -104,25 +93,15 @@ if __name__ == "__main__":
 
     configuration = get_configuration(configuration_name)
 
-    try:
-        alphabet = get_morse_table(alphabet_file)
-    except Exception as ex:
-        print("Das Morsealphabet konnte nicht geladen werden:")
-        print(ex)
-        exit(-1)
+    alphabet = get_cw_table(configuration["cw_table"])
 
-    try:
-        text = get_text_from_feed(feed_name, entry_number)
+    text = get_text_from_feed(feed_url, entry_number)
 
-        if not text_filename is None:
-            with open(text_filename, "w") as file_handle:
-                file_handle.write(text)
+    if not text_filename is None:
+        with open(text_filename, "w") as file_handle:
+            file_handle.write(text)
 
-        create_cw_soundfile(configuration, alphabet, text, output_filename)
+    create_cw_soundfile(configuration, alphabet, text, output_filename)
 
-        if play_sound:
-            winsound.PlaySound(output_filename, winsound.SND_FILENAME)
-
-    except Exception as ex:
-        print(ex)
-        exit(-1)
+    if play_sound:
+        winsound.PlaySound(output_filename, winsound.SND_FILENAME)

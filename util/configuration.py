@@ -1,117 +1,52 @@
-import yaml
+import util.settings
 import random
 import re
 
 
-class _Configuration:
-    def __init__(
-        self,
-        default_settings={
-            "sampling_rate": 44000,
-            "len_dit": 0.1,
-            "ramp_time": None,
-            "frequency": 680
-        }):
+def combine_configuration(settings, name):
+    combined_setup = {}
 
-        with open("cw2wav.yaml", "r") as config_file:
+    while name:
+        element = settings[name]
 
-            self._default_settings = default_settings
+        for key in element.keys():
+            if key in ["name", "base"]:
+                continue
+            if key in combined_setup.keys():
+                continue
+            combined_setup[key] = element[key]
 
-            lines = config_file.readlines()
+        if "base" in element.keys():
+            name = element["base"]
+        else:
+            name = None
+    return combined_setup
 
-            text = "".join(lines)
 
-            yaml_content = yaml.load_all(text, Loader=yaml.FullLoader)
+def replace_range_by_random(text):
+    elements = re.match("(\\d+)-(\\d+)", str(text))
 
-            self._config_lookup = {}
+    if elements:
+        lower = int(elements.group(1))
+        higher = int(elements.group(2))
+        selected = random.randrange(lower, higher)
+        return selected
 
-            if yaml_content:
-                for element in yaml_content:
-                    self._config_lookup[element["name"]] = element
-
-    def _get_inheritance_path(self, name):
-
-        if not name in self._config_lookup.keys():
-            raise Exception("Die ausgewählte Konfiguration '" + name +
-                            "' existiert nicht.")
-
-        configurations = [self._config_lookup[name]]
-
-        path_names = [name]
-
-        while "base" in configurations[0].keys():
-            parent = configurations[0]["base"]
-
-            if parent in path_names:
-                raise Exception("Cyclic configuration!")
-
-            path_names.append(parent)
-
-            if not parent in self._config_lookup.keys():
-                raise Exception(
-                    "Konfiguration '" + configurations[0]["name"] +
-                    "' referenziert eine nicht existierende Konfiguration mit dem Namen '"
-                    + parent + "'.")
-
-            configurations = [self._config_lookup[parent]] + configurations
-
-        return configurations
-
-    def _replace_range_by_random(self, text):
-        elements = re.match("(\\d+)-(\\d+)", str(text))
-
-        if elements:
-            lower = int(elements.group(1))
-            higher = int(elements.group(2))
-            selected = random.randrange(lower, higher)
-            return selected
-
-        return text
-
-    def get_configuration(self, name):
-        path = self._get_inheritance_path(name)
-
-        sources = {}
-
-        result = dict(self._default_settings)
-
-        for element_name in result.keys():
-            sources[element_name] = "builtin"
-
-        for element in path:
-            configuration_name = element["name"]
-
-            for parameter_name in element.keys():
-                if parameter_name == "name":
-                    continue
-
-                if parameter_name == "base":
-                    continue
-
-                result[parameter_name] = self._replace_range_by_random(
-                    element[parameter_name])
-
-                sources[parameter_name] = configuration_name
-
-        print()
-        print(
-            "Anhand der Konfigurationsdatei wurden folgende Einstellungen vorgenommen:"
-        )
-        print(
-            "-------------------------------------------------------------------------"
-        )
-
-        for k in sorted(result.keys()):
-            source_info = ""
-
-            if not name == sources[k]:
-                source_info = " Quelle: '" + sources[k] + "'."
-
-            print("Parameter '" + k + "' wird auf den Wert '" +
-                  str(result[k]) + "' gesetzt." + source_info)
-
-        return result
+    return text
 
 
 def get_configuration(name):
-    return _Configuration().get_configuration(name)
+    settings = util.settings.load_settings("cw2wav.yaml")[0]
+
+    if not name in settings.keys():
+        print("A configuration '" + name +
+              "' does not exist in 'cw2wav.yaml'.")
+        exit()
+
+    combined_settings = combine_configuration(settings, name)
+
+    if "frequency" in combined_settings.keys():
+        combined_settings["frequency"] = replace_range_by_random(
+            combined_settings["frequency"])
+
+    return combined_settings

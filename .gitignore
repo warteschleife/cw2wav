@@ -11,3 +11,4 @@ util/__pycache__/rss.cpython-37.pyc
 *.bat
 feeds.yaml
 cw2wav.yaml
+util/__pycache__/settings.cpython-37.pyc
