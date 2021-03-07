@@ -37,24 +37,6 @@ class _CwGen:
         self._num_samples = 0
         self._frequency = 1
 
-    def _prepare_tones(self):
-
-        len_dah = 3 * self._len_dit
-
-        self._tone_dit = self._generate_tone(self._len_dit, 100,
-                                             self._ramp_time)
-
-        self._tone_dah = self._generate_tone(len_dah, 100, self._ramp_time)
-
-        self._separate_tone = self._generate_tone(self._len_dit, 0, 0)
-
-        self._separate_char = self._generate_tone(self._len_separate_char, 0,
-                                                  0)
-
-        self._paris_cpm = int(calc_paris_bpm(self._len_dit))
-
-        self._paris_wpm = int(calc_paris_bpm(self._len_dit) / 5)
-
     def _generate_tone(self, duration, volume, ramp_time):
         samples = bytearray()
 
@@ -76,6 +58,24 @@ class _CwGen:
             samples.append(value)
 
         return samples
+
+    def _prepare_tones(self):
+
+        len_dah = 3 * self._len_dit
+
+        self._tone_dit = self._generate_tone(self._len_dit, 100,
+                                             self._ramp_time)
+
+        self._tone_dah = self._generate_tone(len_dah, 100, self._ramp_time)
+
+        self._separate_tone = self._generate_tone(self._len_dit, 0, 0)
+
+        self._separate_char = self._generate_tone(self._len_separate_char, 0,
+                                                  0)
+
+        self._paris_cpm = int(calc_paris_bpm(self._len_dit))
+
+        self._paris_wpm = int(calc_paris_bpm(self._len_dit) / 5)
 
     def _replace_mutual_vowels(self, text):
         text = text.lower()
