@@ -217,6 +217,7 @@ def create_cw_soundfile(configuration, alphabet, text, output_filename):
         "sampling_rate": 44000,
         "ramp_time": configuration["len_dit"] / 8,
         "character_gap": configuration["len_dit"] * 3,
+        "frequency": 680
     }
 
     for key in defaults.keys():
