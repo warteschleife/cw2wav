@@ -46,6 +46,26 @@ def replace_range_by_random(text):
     return text
 
 
+class DictWrapper:
+    def __init__(self, name, dictionary):
+        self._name = name
+        self._dictionary = dictionary
+
+    def set(self, name, value):
+        self._dictionary[name] = value
+
+    def get(self, name):
+        if name in self._dictionary.keys():
+            return self._dictionary[name]
+        else:
+            raise Exception("'" + name +
+                            "' is undefined in the configuration '" +
+                            self._name + "'.")
+
+    def keys(self):
+        return self._dictionary.keys()
+
+
 def get_configuration(name="default"):
     settings = util.settings.load_settings("cw2wav.yaml")[0]
 
@@ -60,4 +80,4 @@ def get_configuration(name="default"):
         combined_settings["frequency"] = replace_range_by_random(
             combined_settings["frequency"])
 
-    return combined_settings
+    return DictWrapper(name, combined_settings)

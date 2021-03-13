@@ -6,7 +6,6 @@ if importlib.util.find_spec("winsound"):
     import winsound
     winsound_support = True
 
-from util.morse_table import get_cw_table
 from util.configuration import get_configuration
 from util.cw import create_cw_soundfile
 
@@ -31,18 +30,11 @@ if __name__ == "__main__":
 
     configuration = get_configuration(configuration_name)
 
-    try:
-        alphabet = get_cw_table("alphabet.txt")
-    except Exception as ex:
-        print("Das Morsealphabet konnte nicht geladen werden:")
-        print(ex)
-        exit(-1)
-
     with open(input_filename, "r", encoding="utf8") as textfile:
         text = (" ".join(textfile.readlines())).replace("\n", "=")
 
         try:
-            duration = create_cw_soundfile(configuration, alphabet, text,
+            duration = create_cw_soundfile(configuration, text,
                                            output_filename)
 
             print("Dauer: " + get_time_string(duration))
@@ -50,5 +42,5 @@ if __name__ == "__main__":
             if winsound_support:
                 winsound.PlaySound(output_filename, winsound.SND_FILENAME)
         except Exception as ex:
-            print("Error: " + ex)
+            print("Error: " + str(ex))
             exit(-1)

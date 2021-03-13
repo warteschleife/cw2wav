@@ -1,5 +1,6 @@
 import math
 import wave
+from util.morse_table import get_cw_table
 
 
 def calc_paris_bpm(dit_length):
@@ -212,25 +213,28 @@ class _CwGen:
         self._cw_codes = a
 
 
-def create_cw_soundfile(configuration, alphabet, text, output_filename):
+def create_cw_soundfile(configuration, text, output_filename):
+
+    alphabet = get_cw_table(configuration.get("cw_table"))
+
     cw_gen = _CwGen()
 
     defaults = {
         "sampling_rate": 44000,
-        "ramp_time": configuration["len_dit"] / 8,
-        "character_gap": configuration["len_dit"] * 3,
+        "ramp_time": configuration.get("len_dit") / 8,
+        "character_gap": configuration.get("len_dit") * 3,
         "frequency": 680
     }
 
     for key in defaults.keys():
         if not key in configuration.keys():
-            configuration[key] = defaults[key]
+            configuration.set(key, defaults[key])
 
-    cw_gen.set_sampling_rate(configuration["sampling_rate"])
-    cw_gen.set_len_dit(configuration["len_dit"])
-    cw_gen.set_len_separate_char(configuration["character_gap"])
-    cw_gen.set_frequency(configuration["frequency"])
-    cw_gen.set_ramp_time(configuration["ramp_time"])
+    cw_gen.set_sampling_rate(configuration.get("sampling_rate"))
+    cw_gen.set_len_dit(configuration.get("len_dit"))
+    cw_gen.set_len_separate_char(configuration.get("character_gap"))
+    cw_gen.set_frequency(configuration.get("frequency"))
+    cw_gen.set_ramp_time(configuration.get("ramp_time"))
     cw_gen.set_cw_codes(alphabet)
 
     return cw_gen.generate(text, output_filename)
