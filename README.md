@@ -1,5 +1,10 @@
 **Vorrede:** *Dies ist ein Miniprojekt unter vielen und bietet auch wirklich keine Funktionen, die nicht auch von anderen frei verfügbaren Programmen und Diensten bereitgestellt werden.*
- 
+
+# Letzte Updates
+
+Das Format für die Konfigurationsdatei wurde überarbeitet und ist mit dem alten Format
+nicht mehr kompatibel.
+
 # cw2wav
 ## Übersicht
 

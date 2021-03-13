@@ -18,23 +18,44 @@
 #                  given in the current configuration. So, it is possible to
 #                  derive a configuration from another.
 default:
+  # Frequency of the tone is fixed to 440Hz
   frequency: 440
+  
+  # The 'DIT' has a length of 80ms
   len_dit: 0.08
+
+  # The gap between two characters is 1s
   character_gap: 1.0
+
+  # Use the default alphabet
   cw_table: "alphabet.txt"
 
+
 slow:
+  # Use the settings from 'default' except for 'len_dit', which is defined here
   base: default
-  character_gap: 0.5
 
-ov-training:
-  base: default
-  frequency: 500-750
-  len_dit: 0.055
-  character_gap: 0.70
+  # The 'DIT' has a length of 120ms
+  len_dit: 0.12
 
-advanced-training:
+
+ov-training-1:
+  # Use the settings from 'default' except for 'frequency', 'len_dit' and
+  # 'character_gap', which are defined here
   base: default
+
+  # The tool choses a frequency randomly between 500Hz and 750Hz
   frequency: 500-750
-  len_dit: 0.055
-  character_gap: 0.50
+
+  # The 'DIT' has a length of 60ms
+  len_dit: 0.06
+
+  # The gap between two characters is 600ms
+  character_gap: 0.6
+
+
+ov-training-2:
+  base: default
+  frequency: 650
+  len_dit: 0.065
+  character_gap: 0.6
