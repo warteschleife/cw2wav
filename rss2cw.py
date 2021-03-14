@@ -60,7 +60,6 @@ if __name__ == "__main__":
     output_filename = "tmp-" + output_file_identifier + ".wav"
     text_filename = "tmp-" + output_file_identifier + ".txt"
     entry_number = None
-    alphabet_file = "alphabet.txt"
     help_requested = False
     play_sound = True
 
@@ -93,15 +92,13 @@ if __name__ == "__main__":
 
     configuration = get_configuration(configuration_name)
 
-    alphabet = get_cw_table(configuration["cw_table"])
-
     text = get_text_from_feed(feed_url, entry_number)
 
     if not text_filename is None:
         with open(text_filename, "w") as file_handle:
             file_handle.write(text)
 
-    create_cw_soundfile(configuration, alphabet, text, output_filename)
+    create_cw_soundfile(configuration, text, output_filename)
 
     if play_sound:
         winsound.PlaySound(output_filename, winsound.SND_FILENAME)
