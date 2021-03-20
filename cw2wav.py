@@ -18,6 +18,22 @@ def get_time_string(seconds):
 
 
 if __name__ == "__main__":
+    wakeup = False
+    copy_start = False
+    end_of_message = False
+
+    if "-v" in sys.argv:
+        sys.argv.remove("-v")
+        wakeup = True
+
+    if "-ct" in sys.argv:
+        sys.argv.remove("-ct")
+        copy_start = True
+
+    if "-ar" in sys.argv:
+        sys.argv.remove("-ar")
+        end_of_message = True
+
     if len(sys.argv) < 4:
         print(
             "Der Aufruf benötigt die Parameter 'Konfigurationsname', 'Inputdatei', 'Ausgabedatei'."
@@ -31,7 +47,16 @@ if __name__ == "__main__":
     configuration = get_configuration(configuration_name)
 
     with open(input_filename, "r", encoding="utf8") as textfile:
-        text = (" ".join(textfile.readlines())).replace("\n", "=")
+        text = (" ".join(textfile.readlines())).replace("\n", " ")
+
+        if copy_start:
+            text = "[CT] " + text
+
+        if end_of_message:
+            text = text + " [AR]"
+
+        if wakeup:
+            text = "vvv " + text
 
         try:
             duration = create_cw_soundfile(configuration, text,

@@ -94,7 +94,7 @@ class _CwGen:
         for char in text:
             if char in self._cw_codes.keys():
                 continue
-            if char == " ":
+            if char in [" ", "[", "]"]:
                 continue
             if char in unknown_chars:
                 continue
@@ -130,7 +130,14 @@ class _CwGen:
     def _create_cw_sequence(self, plain_text):
         cw_sequence = ""
 
-        for t in plain_text:
+        while plain_text:
+            if plain_text[0] == "[":
+                index = plain_text.index("]")
+                t = plain_text[1:index]
+                plain_text = plain_text[index + 1:]
+            else:
+                t = plain_text[0]
+                plain_text = plain_text[1:]
             if t == " ":
                 cw_sequence = cw_sequence + " "
                 cw_sequence = cw_sequence + " "

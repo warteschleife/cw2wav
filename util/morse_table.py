@@ -14,10 +14,13 @@ def get_cw_table(file_name):
                 continue
             elements = re.match("^(\\S+)\\s+([\\.-]+)$", line)
             if elements:
-                if elements.group(1) in result.keys():
+                key = elements.group(1).lower()
+                pattern = elements.group(2).lower()
+
+                if key in result.keys():
                     raise Exception("Duplicate definition for character '" +
-                                    elements.group(1) + "'")
-                result[elements.group(1)] = elements.group(2)
+                                    key + "'")
+                result[key] = pattern
             else:
                 raise Exception("Invalid line in '" + file_name + "': \"" +
                                 line + "\"")
