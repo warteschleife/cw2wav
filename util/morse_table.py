@@ -1,5 +1,7 @@
 import re
 
+# Check https://morsecode.world/international/morse.html
+
 
 def get_cw_table(file_name):
     result = {}
@@ -10,7 +12,7 @@ def get_cw_table(file_name):
                 continue
             if line.startswith("#"):
                 continue
-            elements = re.match("^(\\S)\\s+([\\.-]+)$", line)
+            elements = re.match("^(\\S+)\\s+([\\.-]+)$", line)
             if elements:
                 if elements.group(1) in result.keys():
                     raise Exception("Duplicate definition for character '" +
