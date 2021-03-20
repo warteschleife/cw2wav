@@ -1,6 +1,9 @@
 # This is the initial version of the alphabet.
 # Certain characters might still be missing.
 
+SK ...-.-
+AR .-.-.
+CT -.-.-
 a .- 
 b -... 
 c -.-. 
