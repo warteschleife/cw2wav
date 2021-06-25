@@ -27,9 +27,8 @@ character_list = ", ".join(map(lambda x: "'" + x + "'", characters))
 
 print(info_string + character_list)
 
-with open(sys.argv[1], "w") as output_filename:
+with open(output_filename, "w") as output_file:
     for _ in range(5):
         for _ in range(5):
-            output_filename.write(characters[random.randrange(
-                0, len(characters))])
-        output_filename.write("\n")
+            output_file.write(characters[random.randrange(0, len(characters))])
+        output_file.write("\n")
