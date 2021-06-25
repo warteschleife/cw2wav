@@ -8,7 +8,7 @@ alphabet_filename = configuration.get("cw_table")
 
 alphabet = morse_table.get_cw_table(alphabet_filename)
 
-characters = list(alphabet.keys())
+characters = list(filter(lambda x: len(x) == 1, alphabet.keys()))
 
 with open(sys.argv[1], "w") as random_text:
     for _ in range(5):
