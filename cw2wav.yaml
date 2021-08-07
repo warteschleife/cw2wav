@@ -53,9 +53,19 @@ ov-training-1:
   # The gap between two characters is 600ms
   character_gap: 0.6
 
+  word_gap: 1.20
+
 
 ov-training-2:
   base: default
   frequency: 650
-  len_dit: 0.065
-  character_gap: 0.6
+  len_dit: 0.055
+  character_gap: 0.45
+  word_gap: 0.90
+
+
+ov-training-friday:
+   base: default
+   frequency: 500-750
+   len_dit: 0.055
+   character_gap: 0.5

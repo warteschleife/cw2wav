@@ -35,6 +35,7 @@ class _CwGen:
         self._tone_dah = 0
         self._separate_tone = None
         self._separate_char = None
+        self._separate_word = None
         self._num_samples = 0
         self._frequency = 1
 
@@ -72,6 +73,9 @@ class _CwGen:
         self._separate_tone = self._generate_tone(self._len_dit, 0, 0)
 
         self._separate_char = self._generate_tone(self._len_separate_char, 0,
+                                                  0)
+
+        self._separate_word = self._generate_tone(self._len_separate_word, 0,
                                                   0)
 
         self._paris_cpm = int(calc_paris_bpm(self._len_dit))
@@ -127,9 +131,31 @@ class _CwGen:
 
         return text
 
-    def _create_cw_sequence(self, plain_text):
+    def _build_word(self, word):
         cw_sequence = ""
 
+        if word.startswith("[") and word.endswith("]"):
+            return self._cw_codes[word[1:-1]]
+
+        cw_sequence = cw_sequence + self._cw_codes[word[0]]
+
+        for character in word[1:]:
+            cw_sequence = cw_sequence + " "
+            cw_sequence = cw_sequence + self._cw_codes[character]
+
+        return cw_sequence
+
+    def _create_cw_sequence(self, plain_text):
+        words = plain_text.split(" ")
+
+        cw_sequence = self._build_word(words[0])
+
+        for word in words[1:]:
+            cw_sequence = cw_sequence + "|" + self._build_word(word)
+
+        return cw_sequence
+
+    def dumped(self):
         while plain_text:
             if plain_text[0] == "[":
                 index = plain_text.index("]")
@@ -139,8 +165,7 @@ class _CwGen:
                 t = plain_text[0]
                 plain_text = plain_text[1:]
             if t == " ":
-                cw_sequence = cw_sequence + " "
-                cw_sequence = cw_sequence + " "
+                cw_sequence = cw_sequence + "|"
             else:
                 if not t in self._cw_codes.keys():
                     raise Exception("Character '" + t +
@@ -165,6 +190,9 @@ class _CwGen:
             elif t == " ":
                 self._num_samples = self._num_samples + len(
                     self._separate_char)
+            elif t == "|":
+                self._num_samples = self._num_samples + len(
+                    self._separate_word)
 
         self._duration_seconds = self._num_samples / self._sampling_rate
 
@@ -176,6 +204,8 @@ class _CwGen:
             elif t == "-":
                 file_handle.writeframes(bytes(self._tone_dah))
                 file_handle.writeframes(bytes(self._separate_tone))
+            elif t == "|":
+                file_handle.writeframes(bytes(self._separate_word))
             elif t == " ":
                 file_handle.writeframes(bytes(self._separate_char))
 
@@ -210,6 +240,9 @@ class _CwGen:
     def set_len_separate_char(self, ls):
         self._len_separate_char = ls
 
+    def set_len_separate_word(self, ls):
+        self._len_separate_word = ls
+
     def set_frequency(self, f):
         self._frequency = f
 
@@ -230,6 +263,7 @@ def create_cw_soundfile(configuration, text, output_filename):
         "sampling_rate": 44000,
         "ramp_time": configuration.get("len_dit") / 8,
         "character_gap": configuration.get("len_dit") * 3,
+        "word_gap": configuration.get("len_dit") * 6,
         "frequency": 680
     }
 
@@ -240,6 +274,7 @@ def create_cw_soundfile(configuration, text, output_filename):
     cw_gen.set_sampling_rate(configuration.get("sampling_rate"))
     cw_gen.set_len_dit(configuration.get("len_dit"))
     cw_gen.set_len_separate_char(configuration.get("character_gap"))
+    cw_gen.set_len_separate_word(configuration.get("word_gap"))
     cw_gen.set_frequency(configuration.get("frequency"))
     cw_gen.set_ramp_time(configuration.get("ramp_time"))
     cw_gen.set_cw_codes(alphabet)
