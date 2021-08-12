@@ -134,6 +134,9 @@ class _CwGen:
     def _build_word(self, word):
         cw_sequence = ""
 
+        if len(word) == 0:
+            return cw_sequence
+
         if word.startswith("[") and word.endswith("]"):
             return self._cw_codes[word[1:-1]]
 
@@ -147,6 +150,9 @@ class _CwGen:
 
     def _create_cw_sequence(self, plain_text):
         words = plain_text.split(" ")
+
+        if len(words) == 0:
+            return ""
 
         cw_sequence = self._build_word(words[0])
 
