@@ -4,27 +4,12 @@ import math
 import wave
 from util.morse_table import get_cw_table
 from util.sequence_generator import ToneSequenceGenerator
+from util.sample_source import SampleSource
 
 
 def calc_paris_bpm(dit_length):
     length = dit_length * 50
     return (5 * 60) / length
-
-
-class Envelope:
-    def __init__(self, num_samples, rampup_samples):
-        self._num_samples = num_samples
-        self._rampup_samples = rampup_samples
-
-    def get(self, sample_index):
-        if self._rampup_samples == 0:
-            return 1
-        if sample_index <= self._rampup_samples:
-            return sample_index / self._rampup_samples
-        elif sample_index >= (self._num_samples - self._rampup_samples):
-            return (self._num_samples - sample_index) / self._rampup_samples
-        else:
-            return 1
 
 
 class SampleCounter:
@@ -48,63 +33,10 @@ class SampleWriter:
 
 class _CwGen:
     def __init__(self):
+        self._sample_source = SampleSource()
         self._sequence_generator = None
-        self._len_separate_char = 1.8
-        self._len_dit = 0.6
-        self._ramp_time = self._len_dit / 8
-        self._paris_cpm = 0
-        self._paris_wmp = 0
-        self._tone_dit = 0
-        self._tone_dah = 0
-        self._separate_tone = None
-        self._separate_char = None
-        self._separate_word = None
         self._num_samples = 0
-        self._frequency = 1
         self._cw_codes = None
-
-    def _generate_tone(self, duration, volume, ramp_time):
-        samples = bytearray()
-
-        samples_per_period = self._sampling_rate / self._frequency
-
-        num_samples = int(self._sampling_rate * duration)
-
-        num_ramp_samples = int(self._sampling_rate * ramp_time)
-
-        envelope = Envelope(num_samples, num_ramp_samples)
-
-        for n in range(num_samples):
-            angle = (n / samples_per_period) * 2 * math.pi
-
-            envelope_value = envelope.get(n)
-
-            value = int((math.sin(angle) * volume * envelope_value) + 127)
-
-            samples.append(value)
-
-        return samples
-
-    def _prepare_tones(self):
-
-        len_dah = 3 * self._len_dit
-
-        self._tone_dit = self._generate_tone(self._len_dit, 100,
-                                             self._ramp_time)
-
-        self._tone_dah = self._generate_tone(len_dah, 100, self._ramp_time)
-
-        self._separate_tone = self._generate_tone(self._len_dit, 0, 0)
-
-        self._separate_char = self._generate_tone(self._len_separate_char, 0,
-                                                  0)
-
-        self._separate_word = self._generate_tone(self._len_separate_word, 0,
-                                                  0)
-
-        self._paris_cpm = int(calc_paris_bpm(self._len_dit))
-
-        self._paris_wpm = int(calc_paris_bpm(self._len_dit) / 5)
 
     def _replace_mutual_vowels(self, text):
         text = text.lower()
@@ -175,32 +107,20 @@ class _CwGen:
                 cw_sequence = cw_sequence + " "
         return cw_sequence
 
-    def _process_samples(self, cw_sequence, consumer):
-        for t in cw_sequence:
-            if t == ToneSequenceGenerator.DIT:
-                consumer.consume(self._tone_dit)
-                consumer.consume(self._separate_tone)
-            elif t == ToneSequenceGenerator.DAH:
-                consumer.consume(self._tone_dah)
-                consumer.consume(self._separate_tone)
-            elif t == ToneSequenceGenerator.CHARACTER_GAP:
-                consumer.consume(self._separate_char)
-            elif t == ToneSequenceGenerator.WORD_GAP:
-                consumer.consume(self._separate_word)
-
     def _calculate_sample_metrics(self, cw_sequence):
         self._num_samples = 0
 
         counter = SampleCounter()
 
-        self._process_samples(cw_sequence, counter)
+        self._sample_source.process_samples(cw_sequence, counter)
 
         self._num_samples = counter.count()
 
-        self._duration_seconds = self._num_samples / self._sampling_rate
+        self._duration_seconds = self._num_samples / self._sample_source._sampling_rate
 
     def _write_samples(self, file_handle, cw_sequence):
-        self._process_samples(cw_sequence, SampleWriter(file_handle))
+        self._sample_source.process_samples(cw_sequence,
+                                            SampleWriter(file_handle))
 
     def _write_wav_file(self, file_name, sequence):
 
@@ -208,12 +128,10 @@ class _CwGen:
             w.setnframes(self._num_samples)
             w.setnchannels(1)
             w.setsampwidth(1)
-            w.setframerate(self._sampling_rate)
+            w.setframerate(self._sample_source._sampling_rate)
             self._write_samples(w, sequence)
 
     def generate(self, text, file_name):
-        self._prepare_tones()
-
         text = self._simplify_text(text)
 
         cw_sequence = self._sequence_generator.create_cw_sequence(text)
@@ -225,22 +143,22 @@ class _CwGen:
         return self._duration_seconds
 
     def set_sampling_rate(self, sr):
-        self._sampling_rate = sr
+        self._sample_source.set_sampling_rate(sr)
 
     def set_len_dit(self, ld):
-        self._len_dit = ld
+        self._sample_source.set_len_dit(ld)
 
     def set_len_separate_char(self, ls):
-        self._len_separate_char = ls
+        self._sample_source.set_len_separate_char(ls)
 
     def set_len_separate_word(self, ls):
-        self._len_separate_word = ls
+        self._sample_source.set_len_separate_word(ls)
 
     def set_frequency(self, f):
-        self._frequency = f
+        self._sample_source.set_frequency(f)
 
     def set_ramp_time(self, r):
-        self._ramp_time = r
+        self._sample_source.set_ramp_time(r)
 
     def set_cw_codes(self, cw_codes):
         self._sequence_generator = ToneSequenceGenerator(cw_codes)
