@@ -2,7 +2,8 @@
 
 # Letzte Updates
 
-Das Format für die Konfigurationsdatei wurde überarbeitet und ist mit dem alten Format
+- Es wird jetzt automatisch erkannt, ob die winsound Bibliothek verfügbar ist. Ist dies nicht der Fall, wird nur eine Nachricht ausgegeben statt das WAV-File abzuspielen.
+- Das Format für die Konfigurationsdatei wurde überarbeitet und ist mit dem alten Format
 nicht mehr kompatibel.
 
 # cw2wav
