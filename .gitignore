@@ -8,6 +8,7 @@ util/__pycache__/morse_table.cpython-37.pyc
 util/__pycache__/compare.cpython-37.pyc
 util/__pycache__/rss.cpython-37.pyc
 *.bat
+*.pyc
 feeds.yaml
 cw2wav.yaml
 util/__pycache__/settings.cpython-37.pyc
