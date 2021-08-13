@@ -1,3 +1,5 @@
+# -*- coding: <encoding name> -*-
+
 import requests
 import xml.sax as sax
 

@@ -1,3 +1,5 @@
+# -*- coding: <encoding name> -*-
+
 import re
 
 # Check https://morsecode.world/international/morse.html

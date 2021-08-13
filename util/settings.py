@@ -1,3 +1,5 @@
+# -*- coding: <encoding name> -*-
+
 import yaml
 
 

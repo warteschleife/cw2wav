@@ -1,3 +1,5 @@
+# -*- coding: <encoding name> -*-
+
 import math
 import wave
 from util.morse_table import get_cw_table
