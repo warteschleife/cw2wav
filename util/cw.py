@@ -3,6 +3,7 @@
 import math
 import wave
 from util.morse_table import get_cw_table
+from util.sequence_generator import ToneSequenceGenerator
 
 
 def calc_paris_bpm(dit_length):
@@ -26,8 +27,28 @@ class Envelope:
             return 1
 
 
+class SampleCounter:
+    def __init__(self):
+        self._count = 0
+
+    def consume(self, samples):
+        self._count = self._count + len(samples)
+
+    def count(self):
+        return self._count
+
+
+class SampleWriter:
+    def __init__(self, file_handle):
+        self._file_handle = file_handle
+
+    def consume(self, samples):
+        self._file_handle.writeframes(bytes(samples))
+
+
 class _CwGen:
     def __init__(self):
+        self._sequence_generator = None
         self._len_separate_char = 1.8
         self._len_dit = 0.6
         self._ramp_time = self._len_dit / 8
@@ -40,6 +61,7 @@ class _CwGen:
         self._separate_word = None
         self._num_samples = 0
         self._frequency = 1
+        self._cw_codes = None
 
     def _generate_tone(self, duration, volume, ramp_time):
         samples = bytearray()
@@ -133,36 +155,6 @@ class _CwGen:
 
         return text
 
-    def _build_word(self, word):
-        cw_sequence = ""
-
-        if len(word) == 0:
-            return cw_sequence
-
-        if word.startswith("[") and word.endswith("]"):
-            return self._cw_codes[word[1:-1]]
-
-        cw_sequence = cw_sequence + self._cw_codes[word[0]]
-
-        for character in word[1:]:
-            cw_sequence = cw_sequence + " "
-            cw_sequence = cw_sequence + self._cw_codes[character]
-
-        return cw_sequence
-
-    def _create_cw_sequence(self, plain_text):
-        words = plain_text.split(" ")
-
-        if len(words) == 0:
-            return ""
-
-        cw_sequence = self._build_word(words[0])
-
-        for word in words[1:]:
-            cw_sequence = cw_sequence + "|" + self._build_word(word)
-
-        return cw_sequence
-
     def dumped(self):
         while plain_text:
             if plain_text[0] == "[":
@@ -183,39 +175,32 @@ class _CwGen:
                 cw_sequence = cw_sequence + " "
         return cw_sequence
 
+    def _process_samples(self, cw_sequence, consumer):
+        for t in cw_sequence:
+            if t == ToneSequenceGenerator.DIT:
+                consumer.consume(self._tone_dit)
+                consumer.consume(self._separate_tone)
+            elif t == ToneSequenceGenerator.DAH:
+                consumer.consume(self._tone_dah)
+                consumer.consume(self._separate_tone)
+            elif t == ToneSequenceGenerator.CHARACTER_GAP:
+                consumer.consume(self._separate_char)
+            elif t == ToneSequenceGenerator.WORD_GAP:
+                consumer.consume(self._separate_word)
+
     def _calculate_sample_metrics(self, cw_sequence):
         self._num_samples = 0
 
-        for t in cw_sequence:
-            if t == ".":
-                self._num_samples = self._num_samples + len(self._tone_dit)
-                self._num_samples = self._num_samples + len(
-                    self._separate_tone)
-            elif t == "-":
-                self._num_samples = self._num_samples + len(self._tone_dah)
-                self._num_samples = self._num_samples + len(
-                    self._separate_tone)
-            elif t == " ":
-                self._num_samples = self._num_samples + len(
-                    self._separate_char)
-            elif t == "|":
-                self._num_samples = self._num_samples + len(
-                    self._separate_word)
+        counter = SampleCounter()
+
+        self._process_samples(cw_sequence, counter)
+
+        self._num_samples = counter.count()
 
         self._duration_seconds = self._num_samples / self._sampling_rate
 
     def _write_samples(self, file_handle, cw_sequence):
-        for t in cw_sequence:
-            if t == ".":
-                file_handle.writeframes(bytes(self._tone_dit))
-                file_handle.writeframes(bytes(self._separate_tone))
-            elif t == "-":
-                file_handle.writeframes(bytes(self._tone_dah))
-                file_handle.writeframes(bytes(self._separate_tone))
-            elif t == "|":
-                file_handle.writeframes(bytes(self._separate_word))
-            elif t == " ":
-                file_handle.writeframes(bytes(self._separate_char))
+        self._process_samples(cw_sequence, SampleWriter(file_handle))
 
     def _write_wav_file(self, file_name, sequence):
 
@@ -231,7 +216,7 @@ class _CwGen:
 
         text = self._simplify_text(text)
 
-        cw_sequence = self._create_cw_sequence(text)
+        cw_sequence = self._sequence_generator.create_cw_sequence(text)
 
         self._calculate_sample_metrics(cw_sequence)
 
@@ -257,8 +242,9 @@ class _CwGen:
     def set_ramp_time(self, r):
         self._ramp_time = r
 
-    def set_cw_codes(self, a):
-        self._cw_codes = a
+    def set_cw_codes(self, cw_codes):
+        self._sequence_generator = ToneSequenceGenerator(cw_codes)
+        self._cw_codes = cw_codes
 
 
 def create_cw_soundfile(configuration, text, output_filename):
