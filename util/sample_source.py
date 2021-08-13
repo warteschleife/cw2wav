@@ -98,14 +98,23 @@ class SampleSource:
 
     def process_samples(self, cw_sequence, consumer):
         self._prepare_tones()
+
+        last_sound = False
+
         for t in cw_sequence:
             if t == ToneSequenceGenerator.DIT:
+                if last_sound:
+                    consumer.consume(self._separate_tone)
                 consumer.consume(self._tone_dit)
-                consumer.consume(self._separate_tone)
+                last_sound = True
             elif t == ToneSequenceGenerator.DAH:
+                if last_sound:
+                    consumer.consume(self._separate_tone)
                 consumer.consume(self._tone_dah)
-                consumer.consume(self._separate_tone)
+                last_sound = True
             elif t == ToneSequenceGenerator.CHARACTER_GAP:
                 consumer.consume(self._separate_char)
+                last_sound = False
             elif t == ToneSequenceGenerator.WORD_GAP:
                 consumer.consume(self._separate_word)
+                last_sound = False
