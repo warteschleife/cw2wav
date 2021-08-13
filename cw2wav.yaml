@@ -28,7 +28,7 @@ default:
   character_gap: 1.0
 
   # Use the default alphabet
-  cw_table: "alphabet.txt"
+  cw_table: "alphabet-full.txt"
 
 
 slow:
