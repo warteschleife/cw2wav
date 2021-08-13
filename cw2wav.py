@@ -1,13 +1,7 @@
 # -*- coding: <encoding name> -*-
 
 import sys
-import importlib
-
-winsound_support = False
-if importlib.util.find_spec("winsound"):
-    import winsound
-    winsound_support = True
-
+from util.player import play_sound
 from util.configuration import get_configuration
 from util.cw import create_cw_soundfile
 
@@ -66,8 +60,7 @@ if __name__ == "__main__":
 
             print("Dauer: " + get_time_string(duration))
 
-            if winsound_support:
-                winsound.PlaySound(output_filename, winsound.SND_FILENAME)
+            play_sound(output_filename)
         except Exception as ex:
             print("Error: " + str(ex))
             exit(-1)
