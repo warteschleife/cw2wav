@@ -4,7 +4,6 @@ util/__pycache__/__init__.cpython-37.pyc
 util/__pycache__/configuration.cpython-37.pyc
 util/__pycache__/cw.cpython-37.pyc
 util/__pycache__/morse_table.cpython-37.pyc
-*.txt
 *.wav
 util/__pycache__/compare.cpython-37.pyc
 util/__pycache__/rss.cpython-37.pyc
@@ -12,3 +11,6 @@ util/__pycache__/rss.cpython-37.pyc
 feeds.yaml
 cw2wav.yaml
 util/__pycache__/settings.cpython-37.pyc
+rundspruch-komplett
+prepare.sh.txt
+sample.txt
