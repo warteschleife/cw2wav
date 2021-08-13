@@ -142,35 +142,29 @@ class _CwGen:
 
         return self._duration_seconds
 
-    def set_sampling_rate(self, sr):
-        self._sample_source.set_sampling_rate(sr)
-
-    def set_len_dit(self, ld):
-        self._sample_source.set_len_dit(ld)
-
-    def set_len_separate_char(self, ls):
-        self._sample_source.set_len_separate_char(ls)
-
-    def set_len_separate_word(self, ls):
-        self._sample_source.set_len_separate_word(ls)
-
-    def set_frequency(self, f):
-        self._sample_source.set_frequency(f)
-
-    def set_ramp_time(self, r):
-        self._sample_source.set_ramp_time(r)
+    def set_sample_source(self, sample_source):
+        self._sample_source = sample_source
 
     def set_cw_codes(self, cw_codes):
         self._sequence_generator = ToneSequenceGenerator(cw_codes)
         self._cw_codes = cw_codes
 
 
-def create_cw_soundfile(configuration, text, output_filename):
+def get_initialized_sample_source(configuration):
+    sample_source = SampleSource()
 
-    alphabet = get_cw_table(configuration.get("cw_table"))
+    sample_source.set_sampling_rate(configuration.get("sampling_rate"))
+    sample_source.set_len_dit(configuration.get("len_dit"))
+    sample_source.set_len_separate_char(configuration.get("character_gap"))
+    sample_source.set_len_separate_word(configuration.get("word_gap"))
+    sample_source.set_frequency(configuration.get("frequency"))
+    sample_source.set_ramp_time(configuration.get("ramp_time"))
 
-    cw_gen = _CwGen()
+    return sample_source
 
+
+def add_default_settings(configuration):
+    """ Checks the configuration for mandatory key-value-pairs and adds default values when keys are missing. """
     defaults = {
         "sampling_rate": 44000,
         "ramp_time": configuration.get("len_dit") / 8,
@@ -183,12 +177,19 @@ def create_cw_soundfile(configuration, text, output_filename):
         if not key in configuration.keys():
             configuration.set(key, defaults[key])
 
-    cw_gen.set_sampling_rate(configuration.get("sampling_rate"))
-    cw_gen.set_len_dit(configuration.get("len_dit"))
-    cw_gen.set_len_separate_char(configuration.get("character_gap"))
-    cw_gen.set_len_separate_word(configuration.get("word_gap"))
-    cw_gen.set_frequency(configuration.get("frequency"))
-    cw_gen.set_ramp_time(configuration.get("ramp_time"))
+
+def create_cw_soundfile(configuration, text, output_filename):
+
+    add_default_settings(configuration)
+
+    sample_source = get_initialized_sample_source(configuration)
+
+    cw_gen = _CwGen()
+
+    cw_gen.set_sample_source(sample_source)
+
+    alphabet = get_cw_table(configuration.get("cw_table"))
+
     cw_gen.set_cw_codes(alphabet)
 
     return cw_gen.generate(text, output_filename)
