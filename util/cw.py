@@ -1,6 +1,5 @@
 # -*- coding: <encoding name> -*-
 
-import math
 import wave
 from util.morse_table import get_cw_table
 from util.sequence_generator import ToneSequenceGenerator
@@ -10,17 +9,6 @@ from util.sample_source import SampleSource
 def calc_paris_bpm(dit_length):
     length = dit_length * 50
     return (5 * 60) / length
-
-
-class SampleCounter:
-    def __init__(self):
-        self._count = 0
-
-    def consume(self, samples):
-        self._count = self._count + len(samples)
-
-    def count(self):
-        return self._count
 
 
 class SampleWriter:
@@ -35,7 +23,6 @@ class _CwGen:
     def __init__(self):
         self._sample_source = SampleSource()
         self._sequence_generator = None
-        self._num_samples = 0
         self._cw_codes = None
 
     def _replace_mutual_vowels(self, text):
@@ -87,60 +74,28 @@ class _CwGen:
 
         return text
 
-    def dumped(self):
-        while plain_text:
-            if plain_text[0] == "[":
-                index = plain_text.index("]")
-                t = plain_text[1:index]
-                plain_text = plain_text[index + 1:]
-            else:
-                t = plain_text[0]
-                plain_text = plain_text[1:]
-            if t == " ":
-                cw_sequence = cw_sequence + "|"
-            else:
-                if not t in self._cw_codes.keys():
-                    raise Exception("Character '" + t +
-                                    "' is missing in morse table.")
-
-                cw_sequence = cw_sequence + self._cw_codes[t]
-                cw_sequence = cw_sequence + " "
-        return cw_sequence
-
-    def _calculate_sample_metrics(self, cw_sequence):
-        self._num_samples = 0
-
-        counter = SampleCounter()
-
-        self._sample_source.process_samples(cw_sequence, counter)
-
-        self._num_samples = counter.count()
-
-        self._duration_seconds = self._num_samples / self._sample_source._sampling_rate
-
-    def _write_samples(self, file_handle, cw_sequence):
-        self._sample_source.process_samples(cw_sequence,
-                                            SampleWriter(file_handle))
-
     def _write_wav_file(self, file_name, sequence):
+        num_samples = self._sample_source.get_sample_count(sequence)
 
-        with wave.open(file_name, "wb") as w:
-            w.setnframes(self._num_samples)
-            w.setnchannels(1)
-            w.setsampwidth(1)
-            w.setframerate(self._sample_source._sampling_rate)
-            self._write_samples(w, sequence)
+        with wave.open(file_name, "wb") as file_handle:
+            file_handle.setnframes(num_samples)
+            file_handle.setnchannels(1)
+            file_handle.setsampwidth(1)
+            file_handle.setframerate(self._sample_source._sampling_rate)
+
+            self._sample_source.process_samples(sequence,
+                                                SampleWriter(file_handle))
+
+            return num_samples
 
     def generate(self, text, file_name):
         text = self._simplify_text(text)
 
         cw_sequence = self._sequence_generator.create_cw_sequence(text)
 
-        self._calculate_sample_metrics(cw_sequence)
+        num_samples = self._write_wav_file(file_name, cw_sequence)
 
-        self._write_wav_file(file_name, cw_sequence)
-
-        return self._duration_seconds
+        return num_samples / self._sample_source._sampling_rate
 
     def set_sample_source(self, sample_source):
         self._sample_source = sample_source

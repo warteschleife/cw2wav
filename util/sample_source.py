@@ -20,6 +20,17 @@ class Envelope:
             return 1
 
 
+class SampleCounter:
+    def __init__(self):
+        self._count = 0
+
+    def consume(self, samples):
+        self._count = self._count + len(samples)
+
+    def count(self):
+        return self._count
+
+
 class SampleSource:
     def __init__(self):
         self._sampling_rate = None
@@ -95,6 +106,13 @@ class SampleSource:
             samples.append(value)
 
         return samples
+
+    def get_sample_count(self, cw_sequence):
+        counter = SampleCounter()
+
+        self.process_samples(cw_sequence, counter)
+
+        return counter.count()
 
     def process_samples(self, cw_sequence, consumer):
         self._prepare_tones()
