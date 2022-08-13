@@ -1,10 +1,7 @@
 # -*- coding: <encoding name> -*-
 
-from ast import arg
-import sys
 import argparse
 from util.player import play_sound
-from util.configuration import get_configuration
 from util.cw import create_cw_soundfile
 
 
