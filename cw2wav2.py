@@ -45,7 +45,7 @@ if __name__ == "__main__":
     parser.add_argument("--tone", dest="tone", default="400", help="Frequency")
     parser.add_argument("--dit",
                         dest="dit",
-                        default="0.055",
+                        default="0.06",
                         help="Length of DIT in seconds")
     parser.add_argument("--chargap",
                         dest="chargap",
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                         help="Sample Rate")
     parser.add_argument("--ramp_time",
                         dest="ramp_time",
-                        default="0.008",
+                        default="0.0075",
                         help="Ramp Time")
     args = parser.parse_args()
 
