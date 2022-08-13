@@ -108,12 +108,12 @@ class _CwGen:
 def get_initialized_sample_source(configuration):
     sample_source = SampleSource()
 
-    sample_source.set_sampling_rate(configuration.get("sampling_rate"))
-    sample_source.set_len_dit(configuration.get("len_dit"))
-    sample_source.set_len_separate_char(configuration.get("character_gap"))
-    sample_source.set_len_separate_word(configuration.get("word_gap"))
-    sample_source.set_frequency(configuration.get("frequency"))
-    sample_source.set_ramp_time(configuration.get("ramp_time"))
+    sample_source.set_sampling_rate(float(configuration.sample_rate))
+    sample_source.set_len_dit(float(configuration.dit))
+    sample_source.set_len_separate_char(float(configuration.chargap))
+    sample_source.set_len_separate_word(float(configuration.wordgap))
+    sample_source.set_frequency(float(configuration.tone))
+    sample_source.set_ramp_time(float(configuration.ramp_time))
 
     return sample_source
 
@@ -135,15 +135,13 @@ def add_default_settings(configuration):
 
 def create_cw_soundfile(configuration, text, output_filename):
 
-    add_default_settings(configuration)
-
     sample_source = get_initialized_sample_source(configuration)
 
     cw_gen = _CwGen()
 
     cw_gen.set_sample_source(sample_source)
 
-    alphabet = get_cw_table(configuration.get("cw_table"))
+    alphabet = get_cw_table(configuration.cw_table)
 
     cw_gen.set_cw_codes(alphabet)
 
